@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+#
+# author stefano fattore
+#
+# version BETA 0.1
+
+echo "unistalling autogit.."
+
+sudo rm -f /usr/local/bin/autogit
+
+if [[ $1 == "--purge" ]]
+then
+    echo "removing conf folder.."
+    i=$(whoami)
+    if [[ -d "/home/$i/.autogit" ]]
+    then
+        rm -f -r /home/$i/.autogit
+    fi
+fi
+
+echo "done"

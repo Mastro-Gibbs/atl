@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+#
+# author stefano fattore
+#
+# version BETA 0.1
+
+if [ $# -eq 0 ]; then
+    echo "[ERR] => no args, use --help for tips"
+    exit -1
+fi
+
+i=$(whoami)
+
+if [ $1 == "--help" ]; then
+    echo "gitconfigure [options]"
+    echo "  --initall"
+    echo "      set username and password, check for dep and install them"
+    echo
+    echo "  --userdata"
+    echo "      set username and password"
+    echo
+    echo "  --deps"
+    echo "      check for dep and install them"
+    exit 0
+fi
+
+
+if [[ ! -d "/home/$i/.autogit" ]]
+then
+    echo "created /home/$i/.autogit folder.."
+    mkdir /home/$i/.autogit
+fi
+
+if [[ ! -f "/home/$i/.autogit/supersecrets" ]]
+then
+    echo "created /home/$i/.autogit/supersecrets file.."
+    touch /home/$i/.autogit/supersecrets
+fi
+
+echo "autogit configure init..."
+echo
+
+if [ $1 == "--userdata" ]; then
+    echo "set username: "
+    read uname
+
+    echo "set password (no-reply): "
+    read -s passwd
+
+    echo "" > /home/$i/.autogit/supersecrets
+
+    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some > /home/$i/.autogit/supersecrets
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some >> /home/$i/.autogit/supersecrets
+    echo "done"
+    exit 0
+fi
+
+if [ $1 == "--deps" ]; then
+    echo "updating apt.."
+    sudo apt update && sudo apt upgrade
+
+    echo "installing expect.."
+    sudo apt install expect openssl
+
+    echo "done"
+    exit 0
+fi
+
+if [ $1 == "--initall" ]; then
+    echo "set username: "
+    read -s uname
+
+    echo "set password: "
+    read -s passwd
+
+    echo "" > /home/$i/.autogit/supersecrets
+
+    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some > /home/$i/.autogit/supersecrets
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some >> /home/$i/.autogit/supersecrets
+    
+    echo "updating apt.."
+    sudo apt update && sudo apt upgrade
+
+    echo "installing expect.."
+    sudo apt install expect openssl
+
+    echo "done"
+    exit 0
+fi
+
+

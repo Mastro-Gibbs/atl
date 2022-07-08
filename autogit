@@ -1,0 +1,150 @@
+#!/usr/bin/expect
+#
+#
+# author stefano fattore
+#
+# version BETA 0.1
+
+
+set basecmd [lindex $argv]
+set cmd [lindex $argv 0]
+
+if { $cmd == "--help" } {
+    puts "\[HELP\] beta version 0.1"
+    puts ""
+    puts "autogit: for lazy linux developpers"
+    puts "wrap git commands"
+    puts ""
+    puts "syntax: autogit \[options\]"
+    puts ""
+    puts "you can use classic git commands without write 'git'"
+    puts ""
+    puts "revised commands:"
+    puts "  commit -m \"<sampletext>\" -> commit \"<sampletext>\""
+    puts "  add *                    -> addall"
+    puts "  add .                    -> adddot"
+    exit 0
+}
+
+set i [exec whoami]
+set conffile /home/$i/.autogit/supersecrets
+
+if {![file exists $conffile]} {
+    puts "configuration not found! please run autogitconfigure!"
+    exit -1
+}
+
+if { $cmd == "" } {
+    puts "\[ERR\] => args required, aborting.."
+    puts "run with option --help for tips"
+    exit -1
+}
+
+set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+
+set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+
+if { $cmd == "push" || $cmd == "pull" } {
+    spawn git $cmd
+    expect "Username for 'https://github.com':"
+    send "$USERNAME\r"
+    expect "Password for 'https://$USERNAME@github.com':"
+    send "$TOKEN\r"
+    interact
+
+    puts "\[SUC\] => $cmd done, quitting.."
+    exit 0
+}
+
+if { $cmd == "remote" } {
+    if { [lindex $argv 1] == "" } {
+        puts "\[ERR\] => comment required with $cmd option, aborting.."
+        exit -1
+    }
+
+    spawn git add *
+    puts "exec autogit status to watch staging area"
+    interact
+
+    spawn git status
+    interact
+
+    spawn git commit -m \"[lindex $argv 1]\"
+    interact
+
+    spawn git push
+    expect "Username for 'https://github.com':"
+    send "$USERNAME\r"
+    expect "Password for 'https://$USERNAME@github.com':"
+    send "$TOKEN\r"
+    interact
+
+    puts "\[SUC\] => push done, quitting.."
+    exit 0
+}
+
+if { $cmd == "clone" } {
+    set link [lindex $argv 1]
+
+    if { $link == "" } {
+        puts "\[ERR\] => link required with $cmd command, aborting.."
+        exit -1
+    }
+
+    spawn git $cmd $link
+    expect "Username for 'https://github.com':"
+    send "$USERNAME\r"
+    expect "Password for 'https://$USERNAME@github.com':"
+    send "$TOKEN\r"
+    interact
+
+    puts "\[SUC\] => $cmd done, quitting.."
+    exit 0
+}
+
+if { $cmd == "addall" } {
+    spawn git add *
+    puts "exec autogit status to watch staging area"
+    puts "git add * done, quitting.."
+    interact
+    exit 0
+}
+
+if { $cmd == "adddot" } {
+    spawn git add .
+    puts "exec autogit status to watch staging area"
+    puts "git add . done, quitting.."
+    interact
+    exit 0
+}
+
+# funge a cacchio, dc
+if { $cmd == "add" } {
+    if { [lindex $argv 1] == "" } {
+        puts "\[ERR\] => file list required with $cmd command, aborting.."
+        exit -1
+    }
+    spawn git $cmd [lindex $argv 1]
+    interact
+    puts "exec autogit status to watch staging area"
+    puts "git [lindex $argv] done, quitting.."
+    exit 0
+}
+
+if { $cmd == "commit" } {
+
+    if { [lindex $argv 1] == "" } {
+        puts "\[ERR\] => comment required with $cmd command, aborting.."
+        exit -1
+    }
+
+    spawn git $cmd -m \"[lindex $argv 1]\"
+    puts "git commit done, quitting.."
+    interact
+    exit 0
+}
+
+spawn git $basecmd
+puts "$basecmd done, quitting.."
+interact
+exit 0
