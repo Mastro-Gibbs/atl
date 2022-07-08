@@ -18,11 +18,6 @@ if { $cmd == "--help" } {
     puts "syntax: autogit \[options\]"
     puts ""
     puts "you can use classic git commands without write 'git'"
-    puts ""
-    puts "revised commands:"
-    puts "  commit -m \"<sampletext>\" -> commit \"<sampletext>\""
-    puts "  add *                    -> addall"
-    puts "  add .                    -> adddot"
     exit 0
 }
 
