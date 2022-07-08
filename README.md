@@ -8,3 +8,6 @@
 
 ### tips
 - run autogit --help 
+
+# version
+## BETA 0.1
