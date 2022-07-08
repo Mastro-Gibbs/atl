@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1
+# version BETA 0.1.1
 
 
 set basecmd [lindex $argv]
@@ -46,9 +46,17 @@ set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -p
 
 if { $cmd == "push" || $cmd == "pull" } {
     spawn git $cmd
-    expect "Username for 'https://github.com':"
+    expect {
+        timeout { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
+        eof { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
+        "Username for 'https://github.com':"
+    }
     send "$USERNAME\r"
-    expect "Password for 'https://$USERNAME@github.com':"
+    expect {
+        timeout { send_user "\nNo password needed\n"; exit 1 }
+        eof { send_user "\nNo password needed\n"; exit 1 }
+        "Password for 'https://$USERNAME@github.com':"
+    }
     send "$TOKEN\r"
     interact
 
@@ -92,9 +100,17 @@ if { $cmd == "clone" } {
     }
 
     spawn git $cmd $link
-    expect "Username for 'https://github.com':"
+    expect {
+        timeout { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
+        eof { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
+        "Username for 'https://github.com':"
+    }
     send "$USERNAME\r"
-    expect "Password for 'https://$USERNAME@github.com':"
+    expect {
+        timeout { send_user "\nno auth required\n"; exit 1 }
+        eof { send_user "\nno auth required\n"; exit 1 }
+        "Password for 'https://$USERNAME@github.com':"
+    }
     send "$TOKEN\r"
     interact
 
