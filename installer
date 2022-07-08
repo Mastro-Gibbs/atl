@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.1
+# version BETA 0.1.2
 
 echo "copying runner into /usr/local/bin"
 sudo cp autogit /usr/local/bin

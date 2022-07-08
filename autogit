@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.1
+# version BETA 0.1.2
 
 
 set basecmd [lindex $argv]
@@ -64,33 +64,6 @@ if { $cmd == "push" || $cmd == "pull" } {
     exit 0
 }
 
-if { $cmd == "remote" } {
-    if { [lindex $argv 1] == "" } {
-        puts "\[ERR\] => comment required with $cmd option, aborting.."
-        exit -1
-    }
-
-    spawn git add *
-    puts "exec autogit status to watch staging area"
-    interact
-
-    spawn git status
-    interact
-
-    spawn git commit -m \"[lindex $argv 1]\"
-    interact
-
-    spawn git push
-    expect "Username for 'https://github.com':"
-    send "$USERNAME\r"
-    expect "Password for 'https://$USERNAME@github.com':"
-    send "$TOKEN\r"
-    interact
-
-    puts "\[SUC\] => push done, quitting.."
-    exit 0
-}
-
 if { $cmd == "clone" } {
     set link [lindex $argv 1]
 
@@ -115,48 +88,6 @@ if { $cmd == "clone" } {
     interact
 
     puts "\[SUC\] => $cmd done, quitting.."
-    exit 0
-}
-
-if { $cmd == "addall" } {
-    spawn git add *
-    puts "exec autogit status to watch staging area"
-    puts "git add * done, quitting.."
-    interact
-    exit 0
-}
-
-if { $cmd == "adddot" } {
-    spawn git add .
-    puts "exec autogit status to watch staging area"
-    puts "git add . done, quitting.."
-    interact
-    exit 0
-}
-
-# funge a cacchio, dc
-if { $cmd == "add" } {
-    if { [lindex $argv 1] == "" } {
-        puts "\[ERR\] => file list required with $cmd command, aborting.."
-        exit -1
-    }
-    spawn git $cmd [lindex $argv 1]
-    interact
-    puts "exec autogit status to watch staging area"
-    puts "git [lindex $argv] done, quitting.."
-    exit 0
-}
-
-if { $cmd == "commit" } {
-
-    if { [lindex $argv 1] == "" } {
-        puts "\[ERR\] => comment required with $cmd command, aborting.."
-        exit -1
-    }
-
-    spawn git $cmd -m \"[lindex $argv 1]\"
-    puts "git commit done, quitting.."
-    interact
     exit 0
 }
 
