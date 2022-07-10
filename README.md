@@ -1,28 +1,33 @@
 # autogit
 
-## tool for lazy linux developers
-* now support arch, fedora, debian based distros
+>Tool for lazy linux developers.
 
-## package manager supported
-- apt / apt-get
-- dnf
-- pacman
+---
 
-### installing
+## Supported packages manager 
+- [x] apt / apt-get
+- [x] dnf
+- [x] pacman
+- [ ] yum
+- [ ] xbps
+
+---
+
+## Guide
+
+#### installing
 - run sudo ./installer --configure
 
-### tips
-- autogit --help or autorgit -h    -> for help
-- autogit --version or autorgit -v -> for version
+#### tips
+- autogit --help or autorgit -h for help
+- autogit --version or autorgit -v for version
 
-### supported commands
-- autogit pull
-- autogit push
-- autogit clone \[link\]
+---
 
-# last updates
+# Last updates
 - add support for fedora based and arch based
 
-# version
-### BETA 0.1.4
+---
+
+#### version BETA 0.1.4
 
