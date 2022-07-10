@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.3
+# version BETA 0.1.4
 
 
 set basecmd [lindex $argv]

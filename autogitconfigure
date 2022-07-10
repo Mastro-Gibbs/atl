@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.3
+# version BETA 0.1.4
 
 signature(){
 cat << "EOF"
@@ -20,19 +20,21 @@ cat << "EOF"
 EOF
 }
 
-if [ $1 == "--help" ] || [ $1 == "-h" ]; then
-    echo "autogitconfigure [options]"
-    echo "  --initall"
-    echo "      set username and password, check for dep and install them"
-    echo
-    echo "  --userdata"
-    echo "      set username and password"
-    echo
-    echo "  --deps"
-    echo "      check for dep and install them"
-    echo
-    echo "[WARN] => Must be run as sudo or with root privileges"
-    exit 0
+if [ $# == 1 ]; then
+    if [ $1 == "--help" ] || [ $1 == "-h" ]; then
+        echo "autogitconfigure [options]"
+        echo "  --initall"
+        echo "      set username and password, check for dep and install them"
+        echo
+        echo "  --userdata"
+        echo "      set username and password"
+        echo
+        echo "  --deps"
+        echo "      check for dep and install them"
+        echo
+        echo "[WARN] => Must be run as sudo or with root privileges"
+        exit 0
+    fi
 fi
 
 if [ $# -eq 0 ]; then
@@ -65,7 +67,7 @@ fi
 
 user_data(){
     echo "==============================================="
-    echo "          set up your git credentials"
+    echo "          Set up your git credentials"
     echo "==============================================="
     echo
 
@@ -79,57 +81,36 @@ user_data(){
 
     echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some > /home/$i/.autogit/supersecrets
     echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some >> /home/$i/.autogit/supersecrets
-
-    echo "==============================================="
-    echo "          User data set correctly"
-    echo "==============================================="
 }
 
 
 dependencies(){
     echo "==============================================="
-    echo "          checking for dependencies"
+    echo "          Installing dependencies"
     echo "==============================================="
     echo
 
     PACKAGE="expect openssl"
     DEB_PACKAGE_NAME="expect openssl"
     FEDORA_PACKAGE_NAME="expect openssl"
+    ARCH_PACKAGE_NAME="expect openssl"
 
-    if cat /etc/*release | grep ^NAME | grep Ubuntu; then
-        echo "==============================================="
-        echo "Installing packages $DEB_PACKAGE_NAME on Ubuntu"
-        echo "==============================================="
-        apt-get update
-        apt-get install -y $DEB_PACKAGE_NAME
-    elif cat /etc/*release | grep ^NAME | grep Debian ; then
-        echo "==============================================="
-        echo "Installing packages $DEB_PACKAGE_NAME on Debian"
-        echo "==============================================="
-        apt-get update
-        apt-get install -y $DEB_PACKAGE_NAME
-    elif cat /etc/*release | grep ^NAME | grep Mint ; then
-        echo "============================================="
-        echo "Installing packages $DEB_PACKAGE_NAME on Mint"
-        echo "============================================="
-        apt-get update
-        apt-get install -y $DEB_PACKAGE_NAME
-    elif cat /etc/*release | grep ^NAME | grep Knoppix ; then
-        echo "================================================="
-        echo "Installing packages $DEB_PACKAGE_NAME on Kanoppix"
-        echo "================================================="
-        apt-get update
-        apt-get install -y $DEB_PACKAGE_NAME
-    elif cat /etc/*release | grep ^NAME | grep Fedora ; then
-        echo "==============================================="
-        echo "Installing packages $FEDORA_PACKAGE_NAME on Fedora"
-        echo "==============================================="
+    echo "Installing packages $PACKAGE on $(( lsb_release -ds || cat /etc/*release || uname -om ) 2>/dev/null | head -n1)"
+    echo
+
+    if [ -x "$(command -v apt)" ]; then 
+        apt update
+        apt install -y $DEB_PACKAGE_NAME
+    elif [ -x "$(command -v pacman)" ]; then 
+        pacman -S $ARCH_PACKAGE_NAME
+    elif [ -x "$(command -v dnf)" ]; then
         dnf install $FEDORA_PACKAGE_NAME
-    else
+    else 
         echo "OS NOT DETECTED, couldn't install package $PACKAGE"
         exit 1;
     fi
 
+    echo
     echo "==============================================="
     echo "Package $PACKAGE installed successfully"
     echo "==============================================="
