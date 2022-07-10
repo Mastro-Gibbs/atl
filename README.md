@@ -1,7 +1,9 @@
 # autogit
 
->Tool for lazy linux developers.
-
+Tool for lazy linux developers.
+Automate the Git authentication process.
+Automatically inserts username and password (token).
+This data is stored in / home / <user> /.autogit/supersecrets, previously encrypted for security.
 ---
 
 ## Supported packages manager 

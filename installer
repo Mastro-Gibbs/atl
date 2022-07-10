@@ -30,7 +30,7 @@ fi
 echo "Copying the executable into /usr/local/bin.."
 sudo cp autogit /usr/local/bin
 echo "Copying the unistaller into /usr/local/bin.."
-sudo cp uninstaller-autogit /usr/local/bin
+sudo cp uninstall-autogit /usr/local/bin
 echo "done"
 
 if [ $# == 1 ]; then
