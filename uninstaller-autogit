@@ -32,6 +32,7 @@ echo
 echo "unistalling autogit.."
 
 sudo rm -f /usr/local/bin/autogit
+sudo rm -f /usr/local/bin/uninstaller-autogit
 
 if [[ $1 == "--purge" ]]
 then
