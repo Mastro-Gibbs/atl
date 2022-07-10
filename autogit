@@ -70,7 +70,7 @@ set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt
 set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
 
 if { $cmd == "push" || $cmd == "pull" } {
-    spawn git $cmd $basecmd
+    spawn git $cmd [lindex $argv 1]
     expect {
         timeout { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
         eof { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
