@@ -1,6 +1,6 @@
 # autogit
 
-## lazy tool for debian besed distro developpers
+## lazy tool for debian besed distro developers
 
 ### installing
 - run ./autogitconfigure --help
@@ -10,4 +10,4 @@
 - run autogit --help 
 
 # version
-### BETA 0.1.2
+### BETA 0.1.3
