@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2
+# version BETA 0.2.1
 
 if { [llength $argv] == 0 } {
     puts "\[ERR\] => args required, aborting.."
@@ -67,12 +67,17 @@ if { $cmd == "--help" || $cmd == "-h" } {
               \[--git-dir=<path>\] \[--work-tree=<path>\] \[--namespace=<name>\]
               \[--super-prefix=<path>\] \[--config-env=<name>=<envvar>\]
               <command> \[<args>\]"
-    puts "      autogit saio <comment>"
+    puts "      autogit saio \[--remote\] <comment>"
     puts ""
     puts "\033\[97m\033\[01mCommands:\033\[00m"
-    puts "      saio <comment>: 
-            must be combined with a comment, an 'add *' will be made, 
-            followed by 'commit -m <comment>' and finally by 'push'"
+    puts "      saio <comment>
+            Must be combined with a comment necessarily enclosed in double quotes.
+            Otherwise it will have undefined behavior,
+            or a commit will be presented with the first word given after 'saio' command.
+            An 'add *' will be made, 
+            followed by 'commit -m <comment>' 
+            and finally by simple 'push' (maybe).
+            It can be combined with the '--remote' option to make a remote push be performed "
     puts ""
     puts "\"like git command but more lazy\""
     puts ""
@@ -96,7 +101,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.2 \[BETA\]"
+    puts "  0.2.1 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -113,33 +118,45 @@ set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -p
 
 
 if { $cmd == "saio" } {
-    set cmt [lindex $argv 1]
-
     if { [llength $argv] == 1 } {
-        puts "\[ERR\] => args required, aborting.."
+        puts "\[ERR\] => args required with 'saio' command, aborting.."
         puts "run with option --help for tips"
         exit -1
+    }
+
+    set cmt [lindex $argv 1]
+    set rem [lindex $argv 1]
+
+    if { $rem == "--remote" } {
+        if { [llength $argv] == 2 } {
+            puts "\[ERR\] => comment required with --remote option, aborting.."
+            puts "run with option --help for tips"
+            exit -1
+        }
+        set cmt [lindex $argv 2]
     }
 
     spawn git add *
     spawn git commit -m "$cmt"
 
-    spawn git push
-    expect {
-        timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-        eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-        "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
-        "Username for 'https://github.com':"
+    if { $rem == "--remote" } {
+        spawn git push
+        expect {
+            timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+            eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+            "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
+            "Username for 'https://github.com':"
+        }
+        send "$USERNAME\r"
+        expect {
+            timeout { send_user "\nNo password needed\n"; exit 1 }
+            eof { send_user "\nNo password needed\n"; exit 1 }
+            "Password for 'https://$USERNAME@github.com':"
+        }
+        send "$TOKEN\r"
+        interact
     }
-    send "$USERNAME\r"
-    expect {
-        timeout { send_user "\nNo password needed\n"; exit 1 }
-        eof { send_user "\nNo password needed\n"; exit 1 }
-        "Password for 'https://$USERNAME@github.com':"
-    }
-    send "$TOKEN\r"
-    interact
-
+    
     complete $cmd;
 
     exit 0
