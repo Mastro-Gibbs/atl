@@ -112,6 +112,7 @@ if { $cmd == "saio" } {
         exit -1
     }
 
+    
     set cmt [lindex $argv 1]
 
     spawn git add *
