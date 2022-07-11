@@ -125,39 +125,25 @@ if { $cmd == "saio" } {
     }
 
     set cmt [lindex $argv 1]
-    set rem [lindex $argv 1]
-
-    if { $rem == "--remote" } {
-        if { [llength $argv] == 2 } {
-            puts "\[ERR\] => comment required with --remote option, aborting.."
-            puts "run with option --help for tips"
-            exit -1
-        }
-        set cmt [lindex $argv 2]
-    }
 
     spawn git add *
     spawn git commit -m "$cmt"
 
-    if { $rem == "--remote" } {
-        spawn git push
-        expect {
-            timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-            eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-            "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
-            "Username for 'https://github.com':"
-        }
-        send "$USERNAME\r"
-        expect {
-            timeout { send_user "\nNo password needed\n"; exit 1 }
-            eof { send_user "\nNo password needed\n"; exit 1 }
-            "Password for 'https://$USERNAME@github.com':"
-        }
-        send "$TOKEN\r"
-        interact
-    } else {
-        puts "Tip: do autogit push if you are connected to a remote repo."
+    spawn git push
+    expect {
+        timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+        eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+        "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
+        "Username for 'https://github.com':"
     }
+    send "$USERNAME\r"
+    expect {
+        timeout { send_user "\nNo password needed\n"; exit 1 }
+        eof { send_user "\nNo password needed\n"; exit 1 }
+        "Password for 'https://$USERNAME@github.com':"
+    }
+    send "$TOKEN\r"
+    interact
 
     complete $cmd;
 
