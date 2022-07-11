@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.4
+# version BETA 0.2
 
 signature(){
 cat << "EOF"
@@ -105,6 +105,11 @@ dependencies(){
         pacman -S $ARCH_PACKAGE_NAME
     elif [ -x "$(command -v dnf)" ]; then
         dnf install $FEDORA_PACKAGE_NAME
+    elif [ -x "$(command -v yum)" ]; then
+        yum update
+        yum install $PACKAGE
+    elif [ -x "$(command -v xbps)" ]; then
+        xbps-install -Su $PACKAGE
     else 
         echo "OS NOT DETECTED, couldn't install package $PACKAGE"
         exit 1;

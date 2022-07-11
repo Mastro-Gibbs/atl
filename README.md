@@ -10,8 +10,8 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 - [x] apt / apt-get
 - [x] dnf
 - [x] pacman
-- [ ] yum
-- [ ] xbps
+- [x] yum
+- [x] xbps
 
 ---
 
@@ -27,9 +27,10 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 ---
 
 # Last updates
-- add support for fedora based and arch based
+- add support for some pkg managers
+- now can run all git commands
 
 ---
 
-#### version BETA 0.1.4
+#### version BETA 0.2
 

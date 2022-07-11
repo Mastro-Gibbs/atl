@@ -3,14 +3,42 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.4
+# version BETA 0.2
 
+if { [llength $argv] == 0 } {
+    puts "\[ERR\] => args required, aborting.."
+    puts "run with option --help for tips"
+    exit -1
+}
 
-set basecmd [lindex $argv]
+set args [lrange $argv 1 end]
 set cmd [lindex $argv 0]
+set i [exec whoami]
+set conffile /home/$i/.autogit/supersecrets
+
+proc complete {cmd} {
+    if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } {
+        puts "\[SUC\] => $cmd done, quitting.."
+        exit 0
+    }
+    puts "done."
+    exit 0
+}
 
 if { $cmd == "--help" || $cmd == "-h" } {
-    puts "==============================================="
+    set cmd_help [lindex $argv 1]
+    if { $cmd_help != "" } {
+        if { $cmd_help == "git" } {
+            puts [exec man git]
+            puts ""
+            exit 0
+        }
+        puts [exec man git-$cmd_help]
+        puts ""
+        exit 0
+    }
+
+    puts "\033\[95m==============================================="
     puts "
                 _                  _  _   
                | |                (_)| |  
@@ -21,19 +49,40 @@ if { $cmd == "--help" || $cmd == "-h" } {
                              __/ |        
                             |___/         "
     puts ""
-    puts "=============================================="
+    puts "==============================================\033\[00m"
     puts ""
-    puts "autogit: for lazy linux developers"
+    puts "\033\[97m\033\[01mName:\033\[00m"
+    puts "      Autogit, for lazy people"
     puts ""
-    puts "syntax: autogit \[command\] \[options\]"
+    puts "\033\[97m\033\[01mDescription:\033\[00m"
+    puts "      Wraps up the git command set by adding handy features for lazy linux developers.
+      Essentially this tool automatically detects the request for 
+      username and password (token) and inserts them for you.
+      Read a file present in a configuration folder in the home, containing user data."
     puts ""
-    puts "commands supported:"
-    puts "  push | pull | clone"
+    puts "\033\[97m\033\[01mSyntax:\033\[00m"
+    puts "      autogit \[--version|-v\] \[--help|-h\] \[-C <path>\] \[-c <name>=<value>\]
+              \[--exec-path\[=<path>\]\] \[--html-path\] \[--man-path\] \[--info-path\]
+              \[-p|--paginate|-P|--no-pager\] \[--no-replace-objects\] \[--bare\]
+              \[--git-dir=<path>\] \[--work-tree=<path>\] \[--namespace=<name>\]
+              \[--super-prefix=<path>\] \[--config-env=<name>=<envvar>\]
+              <command> \[<args>\]"
+    puts "      autogit saio <comment>"
+    puts ""
+    puts "\033\[97m\033\[01mCommands:\033\[00m"
+    puts "      saio <comment>: 
+            must be combined with a comment, an 'add *' will be made, 
+            followed by 'commit -m <comment>' and finally by 'push'"
+    puts ""
+    puts "\"like git command but more lazy\""
+    puts ""
+    puts "run \[-h|--help\] <git command> to view his man page"
+    puts ""
     exit 0
 }
 
 if { $cmd == "--version" || $cmd == "-v" } {
-    puts "==============================================="
+    puts "\033\[95m==============================================="
     puts "
                 _                  _  _   
                | |                (_)| |  
@@ -44,36 +93,42 @@ if { $cmd == "--version" || $cmd == "-v" } {
                              __/ |        
                             |___/         "
     puts ""
-    puts "=============================================="
+    puts "==============================================\033\[00m"
     puts ""
-    puts "Version: 0.1.3 \[BETA\]"
+    puts "\033\[97m\033\[01mVersion:\033\[00m"
+    puts "  0.2 \[BETA\]"
+    puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
     exit 0
 }
-
-set i [exec whoami]
-set conffile /home/$i/.autogit/supersecrets
 
 if {![file exists $conffile]} {
     puts "configuration not found! please run autogitconfigure!"
     exit -1
 }
 
-if { $cmd == "" } {
-    puts "\[ERR\] => args required, aborting.."
-    puts "run with option --help for tips"
-    exit -1
-}
-
 set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
 set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
 
-if { $cmd == "push" || $cmd == "pull" } {
-    spawn git $cmd [lindex $argv 1]
+
+if { $cmd == "saio" } {
+    set cmt [lindex $argv 1]
+
+    if { [llength $argv] == 1 } {
+        puts "\[ERR\] => args required, aborting.."
+        puts "run with option --help for tips"
+        exit -1
+    }
+
+    spawn git add *
+    spawn git commit -m "$cmt"
+
+    spawn git push
     expect {
-        timeout { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
-        eof { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
+        timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+        eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+        "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
         "Username for 'https://github.com':"
     }
     send "$USERNAME\r"
@@ -85,36 +140,31 @@ if { $cmd == "push" || $cmd == "pull" } {
     send "$TOKEN\r"
     interact
 
-    puts "\[SUC\] => $cmd done, quitting.."
+    complete $cmd;
+
     exit 0
 }
 
-if { $cmd == "clone" } {
-    set link [lindex $argv 1]
 
-    if { $link == "" } {
-        puts "\[ERR\] => link required with $cmd command, aborting.."
-        exit -1
-    }
-
-    spawn git $cmd $link
-    expect {
-        timeout { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
-        eof { send_user "\nno auth required\n"; puts "\[SUC\] => $cmd done, quitting.."; exit 1 }
-        "Username for 'https://github.com':"
-    }
-    send "$USERNAME\r"
-    expect {
-        timeout { send_user "\nno auth required\n"; exit 1 }
-        eof { send_user "\nno auth required\n"; exit 1 }
-        "Password for 'https://$USERNAME@github.com':"
-    }
-    send "$TOKEN\r"
-    interact
-
-    puts "\[SUC\] => $cmd done, quitting.."
-    exit 0
+spawn git $cmd {*}$args
+expect {
+    timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+    eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+    "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
+    "Username for 'https://github.com':"
 }
+send "$USERNAME\r"
+expect {
+    timeout { send_user "\nNo password needed\n"; exit 1 }
+    eof { send_user "\nNo password needed\n"; exit 1 }
+    "Password for 'https://$USERNAME@github.com':"
+}
+send "$TOKEN\r"
+interact
 
-echo "For this $cmd use git"
+complete $cmd;
+
 exit 0
+
+
+
