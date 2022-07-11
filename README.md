@@ -32,5 +32,5 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 
 ---
 
-#### version BETA 0.2.1
+#### version BETA 0.2.2
 

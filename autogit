@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.1
+# version BETA 0.2.2
 
 if { [llength $argv] == 0 } {
     puts "\[ERR\] => args required, aborting.."
@@ -101,7 +101,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.2.1 \[BETA\]"
+    puts "  0.2.2 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -155,8 +155,10 @@ if { $cmd == "saio" } {
         }
         send "$TOKEN\r"
         interact
+    } else {
+        puts "Tip: do autogit push if you are connected to a remote repo."
     }
-    
+
     complete $cmd;
 
     exit 0

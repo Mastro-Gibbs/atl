@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.1
+# version BETA 0.2.2
 
 signature(){
 cat << "EOF"
