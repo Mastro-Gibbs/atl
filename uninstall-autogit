@@ -37,6 +37,7 @@ sudo rm -f /usr/local/bin/uninstall-autogit
 echo "Elaborate man-db"
 sudo rm -f /usr/local/man/man1/autogit.1.gz
 sudo rm -f /usr/local/man/man1/autogit.1
+sudo mandb
 
 if [[ $1 == "--purge" ]]
 then

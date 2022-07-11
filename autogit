@@ -64,8 +64,7 @@ if { $cmd == "--help" || $cmd == "-h" } {
             or a commit will be presented with the first word given after 'saio' command.
             An 'add *' will be made, 
             followed by 'commit -m <comment>' 
-            and finally by simple 'push' (maybe).
-            It can be combined with the '--remote' option to make a remote push be performed "
+            and finally by simple 'push'."
     puts ""
     puts "\"like git command but more lazy\""
     puts ""
