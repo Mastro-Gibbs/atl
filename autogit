@@ -51,23 +51,11 @@ if { $cmd == "--help" || $cmd == "-h" } {
     puts ""
     puts "==============================================\033\[00m"
     puts ""
-    puts "\033\[97m\033\[01mName:\033\[00m"
-    puts "      Autogit, for lazy people"
-    puts ""
     puts "\033\[97m\033\[01mDescription:\033\[00m"
     puts "      Wraps up the git command set by adding handy features for lazy linux developers.
       Essentially this tool automatically detects the request for 
       username and password (token) and inserts them for you.
       Read a file present in a configuration folder in the home, containing user data."
-    puts ""
-    puts "\033\[97m\033\[01mSyntax:\033\[00m"
-    puts "      autogit \[--version|-v\] \[--help|-h\] \[-C <path>\] \[-c <name>=<value>\]
-              \[--exec-path\[=<path>\]\] \[--html-path\] \[--man-path\] \[--info-path\]
-              \[-p|--paginate|-P|--no-pager\] \[--no-replace-objects\] \[--bare\]
-              \[--git-dir=<path>\] \[--work-tree=<path>\] \[--namespace=<name>\]
-              \[--super-prefix=<path>\] \[--config-env=<name>=<envvar>\]
-              <command> \[<args>\]"
-    puts "      autogit saio \[--remote\] <comment>"
     puts ""
     puts "\033\[97m\033\[01mCommands:\033\[00m"
     puts "      saio <comment>
