@@ -31,6 +31,18 @@ echo "Copying the executable into /usr/local/bin.."
 sudo cp autogit /usr/local/bin
 echo "Copying the unistaller into /usr/local/bin.."
 sudo cp uninstall-autogit /usr/local/bin
+echo "Elaborate man-db.."
+
+if [[ ! -d "/usr/local/man/man1" ]]
+then
+    sudo mkdir /usr/local/man/man1
+fi
+
+sudo rm -f /usr/local/man/man1/autogit.1.gz
+sudo cp autogit.1 /usr/local/man/man1
+sudo gzip /usr/local/man/man1/autogit.1
+sudo mandb
+
 echo "done"
 
 if [ $# == 1 ]; then
