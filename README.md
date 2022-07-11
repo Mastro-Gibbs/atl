@@ -29,6 +29,7 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 # Last updates
 - add support for some pkg managers
 - now can run all git commands
+- add man page
 
 ---
 
