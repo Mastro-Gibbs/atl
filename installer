@@ -46,6 +46,7 @@ echo "Copying the executable into $folder.."
 i=$(whoami)
 
 if ! $(touch "${folder}/test" 2> /dev/null ); then
+    echo "Need sudo privileges to copy the executable.." 
     if ! sudo cp autogit $folder; then
         echo "An error occurred while copying executable, exiting"
         exit -1
