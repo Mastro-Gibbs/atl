@@ -142,6 +142,13 @@ if { $cmd == "--help" || $cmd == "-h" } {
     help_section $argv
 }
 
+if {![file exists $conffile]} {
+    puts "configuration not found! please run autogitconfigure!"
+    exit -1
+}
+set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+
 
 if { $cmd == "saio" } {
     if { [llength $argv] == 1 } {
@@ -176,14 +183,6 @@ if { $cmd == "saio" } {
 
     exit 0
 }
-
-
-if {![file exists $conffile]} {
-    puts "configuration not found! please run autogitconfigure!"
-    exit -1
-}
-set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
-set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
 
 
 spawn -noecho git $cmd {*}$args
