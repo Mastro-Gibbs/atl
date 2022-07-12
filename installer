@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.2
+# version BETA 0.3
 
 if [ $# == 1 ]; then
     if [ $1 == "--help" ] || [ $1 == "-h" ]; then
@@ -28,20 +28,43 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
 fi
 
 echo "Copying the executable into /usr/local/bin.."
-sudo cp autogit /usr/local/bin
-echo "Copying the unistaller into /usr/local/bin.."
-sudo cp uninstall-autogit /usr/local/bin
-echo "Elaborate man-db.."
+if ! sudo cp autogit /usr/local/bin; then
+    echo "An error occurred while copying executable, exiting"
+    exit -1
+fi
+
+echo "Generating entry for man.."
 
 if [[ ! -d "/usr/local/man/man1" ]]
 then
     sudo mkdir /usr/local/man/man1
 fi
 
-sudo rm -f /usr/local/man/man1/autogit.1.gz
-sudo cp autogit.1 /usr/local/man/man1
-sudo gzip /usr/local/man/man1/autogit.1
-sudo mandb
+{
+    if ! sudo rm -f /usr/local/man/man1/autogit.1.gz; then
+        echo "An error occurred while generating entry for man, exiting"
+        exit -1
+    fi
+    if ! sudo cp autogit.1 /usr/local/man/man1; then
+        echo "An error occurred while generating entry for man, exiting"
+        exit -1
+    fi
+    if ! sudo gzip /usr/local/man/man1/autogit.1; then
+        echo "An error occurred while generating entry for man, exiting"
+        exit -1
+    fi
+} &> /dev/null
+
+
+echo "Running trigger for man-db.."
+
+{
+    if ! sudo mandb; then
+        echo "An error occurred while running trigger for man-db, exiting"
+        exit -1
+    fi
+} &> /dev/null
+
 
 echo "done"
 

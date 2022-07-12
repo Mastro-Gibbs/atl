@@ -3,18 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.2
-
-if { [llength $argv] == 0 } {
-    puts "\[ERR\] => args required, aborting.."
-    puts "run with option --help for tips"
-    exit -1
-}
-
-set args [lrange $argv 1 end]
-set cmd [lindex $argv 0]
-set i [exec whoami]
-set conffile /home/$i/.autogit/supersecrets
+# version BETA 0.3
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } {
@@ -25,16 +14,17 @@ proc complete {cmd} {
     exit 0
 }
 
-if { $cmd == "--help" || $cmd == "-h" } {
-    set cmd_help [lindex $argv 1]
-    if { $cmd_help != "" } {
+
+proc help_section {arguments} {
+    if { [llength $arguments] == 2 } {
+        set cmd_help [lindex $arguments 1]
         if { $cmd_help == "git" } {
             puts [exec man git]
             puts ""
             exit 0
         }
-        puts [exec man git-$cmd_help]
-        puts ""
+        spawn -noecho man git-$cmd_help
+        interact
         exit 0
     }
 
@@ -66,12 +56,30 @@ if { $cmd == "--help" || $cmd == "-h" } {
             followed by 'commit -m <comment>' 
             and finally by simple 'push'."
     puts ""
+    puts "      uninstall \[--purge\]
+            Uninstall autogit. It can be combined with --purge option to remove conf folder."
+    puts ""
     puts "\"like git command but more lazy\""
     puts ""
     puts "run \[-h|--help\] <git command> to view his man page"
     puts ""
     exit 0
 }
+
+
+if { [llength $argv] == 0 } {
+    puts "\[WARN\] => args required, running help.."
+    sleep 1
+    help_section $argv
+}
+
+
+set args [lrange $argv 1 end]
+set cmd [lindex $argv 0]
+set i [exec whoami]
+set conffile /home/$i/.autogit/supersecrets
+set conffolder /home/$i/.autogit
+
 
 if { $cmd == "--version" || $cmd == "-v" } {
     puts "\033\[95m==============================================="
@@ -95,13 +103,44 @@ if { $cmd == "--version" || $cmd == "-v" } {
     exit 0
 }
 
-if {![file exists $conffile]} {
-    puts "configuration not found! please run autogitconfigure!"
-    exit -1
+
+if { $cmd == "uninstall" } {
+    puts "==============================================="
+    puts "             Autogit unistaller"
+    puts "==============================================="
+    puts ""
+    if { [llength $argv] == 2 } {
+        set purge [lindex $argv 1]
+        if { $purge == "--purge" || $purge == "-p" } {
+            if {![file exists $conffile]} {
+                puts "Configuration not found! cannot execute --purge option!"
+            } else {
+                puts "Removing conf folder.."
+                exec rm -f -r $conffolder
+            }
+        } else {
+            puts "Option '$purge' not recognized. Proceed to uninstall autogit."
+        }
+    }
+
+    puts "Unistalling autogit.."
+
+    exec sudo rm -f /usr/local/bin/autogit
+
+    puts "Removing entry for man-db"
+    exec sudo rm -f /usr/local/man/man1/autogit.1.gz
+    exec sudo rm -f /usr/local/man/man1/autogit.1
+
+    puts "Elaborating trigger for man-db"
+    spawn -noecho sudo mandb
+
+    complete $cmd
 }
 
-set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
-set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+
+if { $cmd == "--help" || $cmd == "-h" } {
+    help_section $argv
+}
 
 
 if { $cmd == "saio" } {
@@ -111,14 +150,13 @@ if { $cmd == "saio" } {
         exit -1
     }
 
-
     set cmt [lindex $argv 1]
 
-    spawn git add *
-    spawn git add .
-    spawn git commit -m "$cmt"
+    spawn -noecho git add *
+    spawn -noecho git add .
+    spawn -noecho git commit -m "$cmt"
 
-    spawn git push
+    spawn -noecho git push
     expect {
         timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
         eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
@@ -140,7 +178,15 @@ if { $cmd == "saio" } {
 }
 
 
-spawn git $cmd {*}$args
+if {![file exists $conffile]} {
+    puts "configuration not found! please run autogitconfigure!"
+    exit -1
+}
+set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+
+
+spawn -noecho git $cmd {*}$args
 expect {
     timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
     eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }

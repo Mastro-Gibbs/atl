@@ -7,15 +7,9 @@
 autogit - for lazy people
 .SH SYNOPSIS
 .IP \[bu] 2
-\f[B]autogit\f[R] [\[en]version] [\[en]help] [-C <path>] [-c
-<name>=<value>] [\[en]exec-path[=<path>]] [\[en]html-path]
-[\[en]man-path][\[en]info-path] [-p|\[en]paginate|-P|\[en]no-pager]
-[\[en]no-replace-objects][\[en]bare] [\[en]git-dir=<path>]
-[\[en]work-tree=<path>][\[en]namespace=<name>]
-[\[en]super-prefix=<path>]
-[\[en]config-env=<name>=<envvar>]<command>[<args>]
+see synopsis for \f[B]git\f[R]
 .IP \[bu] 2
-\f[B]autogit\f[R] saio <comment>
+\f[B]autogit\f[R] <command>\ [<args>|<options>]
 .SH DESCRIPTION
 .PP
 \f[B]autogit\f[R] wraps up the git command set by adding handy features
@@ -25,40 +19,51 @@ password (token) and inserts them for you.
 Read a file present in a configuration folder in the home, containing
 user data.
 .SH OPTIONS
-.TP
-\f[B]basics\f[R]
-See man git(1)
+.PP
+For \f[B]basics\f[R] options see man git(1).
 .TP
 \f[B]-h\f[R], \f[B]\[en]help\f[R]
-Display a friendly help message
+Display a friendly help message.
 .TP
 \f[B]-v\f[R], \f[B]\[en]version\f[R]
-Display software version
+Display software version.
+.TP
+\f[B]-p\f[R], \f[B]\[en]purge\f[R]
+Combined with command \f[B]uninstall\f[R] remove configuration folder.
 .SH COMMANDS
+.PP
+For \f[B]basics\f[R] commands see man git(1).
 .TP
 \f[B]saio\f[R]
 Must be combined with a comment necessarily enclosed in double quotes.
 Otherwise it will have undefined behavior, or a commit will be presented
 with the first word given after `saio' command.An \[cq]add *\[cq] will
 be made, followed by `commit -m ' and finally by simple `push'.
+.TP
+\f[B]uninstall\f[R]
+Can be combined with \[en]purge option to remove configuration folder.
+It will uninstall \f[B]autogit\f[R].
 .SH EXAMPLES
 .TP
-\f[B]autogit add \f[R]*
-See man git-add(1)
+\f[B]autogit add .\f[R]
+See man git-add(1).
 .TP
 \f[B]autogit saio \[lq]commit message example\[rq]\f[R]
 Aka `simple all in one' command.
-Do `add', `commit' and `push'
+Do `add', `commit' and `push'.
+.TP
+\f[B]autogit uninstall\f[R]
+Run uninstall routine.
 .SH EXIT VALUES
 .TP
 \f[B]-1\f[R]
-On error
+On error.
 .TP
 \f[B]0\f[R]
-On success
+On success.
 .TP
 \f[B]1\f[R]
-When auth is not required
+When auth is not required.
 .SH COPYRIGHT
 .PP
 Copyright (C) 2022 Stefano Fattore.

@@ -18,20 +18,27 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 ## Guide
 
 #### installing
-- run sudo ./installer --configure
+- run ```sudo ./installer --configure``` to run installer script. ```--configure``` option will run the configuration script entirely.
+
+### usages
+- run ```autogit saio "commit msg example"``` for execute a "simple all in one" command aka ```git add *``` and ```git add .```, ```git commit -m "commit msg example"``` and ```git push```.
+- run ```autogit add *``` like ```git add *```.
+- run ```autogit uninstall --purge``` to complete uninstall this tool.
 
 #### tips
-- autogit --help or autorgit -h for help
-- autogit --version or autorgit -v for version
+- ```autogit --help``` or ```autorgit -h``` for help
+- ```autogit --version``` or ```autorgit -v``` for version
 
 ---
 
 # Last updates
 - add support for some pkg managers
 - now can run all git commands
-- add man page
+- modified man page
+- fixed some bugs
+- merged uninstall script into autogit
 
 ---
 
-#### version BETA 0.2.2
+#### version BETA 0.3
 
