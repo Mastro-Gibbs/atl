@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3
+# version BETA 0.3.1
 
 if [ $# == 1 ]; then
     if [ $1 == "--help" ] || [ $1 == "-h" ]; then
@@ -12,7 +12,9 @@ if [ $# == 1 ]; then
         echo "  --configure"
         echo "      initializes the configuration process"
         echo
-        echo "[WARN] => Must be run as sudo or with root privileges"
+        echo "  --prefix <path>"
+        echo "      specifies the installation path" 
+        echo
         exit 0
     fi
 fi
@@ -22,48 +24,143 @@ echo "             Autogit installer"
 echo "==============================================="
 echo
 
-if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[ERR] => Not running as root, use user root account or sudo"
-    exit -1
+folder="/usr/local/bin"
+
+if [ $# -eq 2 ]; then
+    if [ $1 == "--prefix" ]; then
+        folder=$2
+    fi
 fi
 
-echo "Copying the executable into /usr/local/bin.."
-if ! sudo cp autogit /usr/local/bin; then
-    echo "An error occurred while copying executable, exiting"
-    exit -1
+echo "Copying the executable into $folder.."
+
+i=$(whoami)
+if [ $(sudo -u $i test -w $folder) ]; then
+    if ! sudo cp autogit $folder; then
+        echo "An error occurred while copying executable, exiting"
+        exit -1
+    fi
+else
+    if [[ ! -d "${folder}autogit" ]]
+    then
+        if ! mkdir "${folder}autogit"; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+
+    if [[ ! -d "${folder}autogit/bin" ]]
+    then
+        if ! mkdir "${folder}autogit/bin"; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+
+    if [[ ! -d "/home/$i/.autogit" ]]
+    then
+        if ! mkdir /home/$i/.autogit; then
+            echo "An error occurred, exiting"
+            exit -1
+        else
+            echo "Created /home/$i/.autogit conf folder.."
+        fi
+    fi
+
+    if [[ ! -f "/home/$i/.autogit/cache" ]]
+    then
+        if ! touch /home/$i/.autogit/cache; then
+            echo "An error occurred, exiting"
+            exit -1
+        else
+            echo "Created /home/$i/.autogit/cache file.."
+        fi
+    fi
+
+    if ! echo "${folder}autogit" > /home/$i/.autogit/cache ; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+
+    if ! cp autogit "${folder}autogit/bin"; then
+        echo "An error occurred while copying executable, exiting"
+        exit -1
+    fi
+
+    echo
+    echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
+    read response 
+
+    if [ $response == "Y" ] || [ $response == "y" ]; then
+        if [[ -f "/usr/local/bin/autogit" ]]
+        then
+            if ! sudo rm -f /usr/local/bin/autogit; then
+                echo "An error occurred, exiting"
+                exit -1
+            else
+                echo "Removing prevoius soft link"
+            fi
+        fi
+        
+        if ! sudo ln -s "${folder}autogit/bin/autogit" /usr/local/bin/autogit; then
+            echo "An error occurred while creating symbolic link, exiting"
+            exit -1
+        else 
+            echo "Soft link created"
+        fi
+    else
+        echo "Generating new soft link aborted."
+    fi
 fi
 
-echo "Generating entry for man.."
+echo
+echo "Do you want to generate an entry for man? needs sudo permissions [y/n]"
+read response 
 
-if [[ ! -d "/usr/local/man/man1" ]]
-then
-    sudo mkdir /usr/local/man/man1
+if [ $response == "Y" ] || [ $response == "y" ]; then
+    echo "Generating entry for man.."
+
+    if [[ ! -d "/usr/share/man/man1" ]]
+    then
+        if ! sudo mkdir /usr/share/man/man1; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+
+    {
+        if ! sudo rm -f /usr/share/man/man1/autogit.1.gz; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+        if ! sudo cp autogit.1 /usr/share/man/man1; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+        if ! sudo gzip /usr/share/man/man1/autogit.1; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+        if ! sudo rm -f /usr/share/man/man1/autogit.1; then
+            echo "An error occurred while removing autogit cache for man, exiting"
+            exit -1
+        fi
+    } &> /dev/null
+
+    echo
+    echo "Running trigger for man-db.."
+
+    {
+        if ! sudo mandb; then
+            echo "An error occurred while running trigger for man-db, exiting"
+            exit -1
+        fi
+    } &> /dev/null
+
+else
+    echo "Generating new entry for man aborted."
 fi
 
-{
-    if ! sudo rm -f /usr/local/man/man1/autogit.1.gz; then
-        echo "An error occurred while generating entry for man, exiting"
-        exit -1
-    fi
-    if ! sudo cp autogit.1 /usr/local/man/man1; then
-        echo "An error occurred while generating entry for man, exiting"
-        exit -1
-    fi
-    if ! sudo gzip /usr/local/man/man1/autogit.1; then
-        echo "An error occurred while generating entry for man, exiting"
-        exit -1
-    fi
-} &> /dev/null
-
-
-echo "Running trigger for man-db.."
-
-{
-    if ! sudo mandb; then
-        echo "An error occurred while running trigger for man-db, exiting"
-        exit -1
-    fi
-} &> /dev/null
 
 
 echo "done"

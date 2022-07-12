@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3
+# version BETA 0.3.1
 
 signature(){
 cat << "EOF"
@@ -32,18 +32,12 @@ if [ $# == 1 ]; then
         echo "  --deps"
         echo "      check for dep and install them"
         echo
-        echo "[WARN] => Must be run as sudo or with root privileges"
         exit 0
     fi
 fi
 
 if [ $# -eq 0 ]; then
     echo "[ERR] => No args detected, use --help for tips"
-    exit -1
-fi
-
-if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-    echo "[ERR] => Not running as root, user root account or sudo"
     exit -1
 fi
 
@@ -69,7 +63,7 @@ user_data(){
     echo "==============================================="
     echo "          Set up your git credentials"
     echo "==============================================="
-    echo
+    echo    
 
     echo "> Set username: "
     read uname

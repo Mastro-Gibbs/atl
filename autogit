@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3
+# version BETA 0.3.1
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
@@ -51,7 +51,7 @@ proc help_section {arguments} {
             Must be combined with a comment necessarily enclosed in double quotes.
             Otherwise it will have undefined behavior,
             or a commit will be presented with the first word given after 'saio' command.
-            An 'add *' will be made, 
+            An 'add .' will be made, 
             followed by 'commit -m <comment>' 
             and finally by simple 'push'."
     puts ""
@@ -95,7 +95,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.2.2 \[BETA\]"
+    puts "  0.3.1 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -123,12 +123,15 @@ if { $cmd == "uninstall" } {
     }
 
     puts "Unistalling autogit.."
-
+    puts "Removing soft link"
     exec sudo rm -f /usr/local/bin/autogit
 
+    puts "Removing installation folder"
+    set ifol [exec head -n1 /home/$i/.autogit/cache]
+    exec sudo rm -fr $ifol  
+
     puts "Removing entry for man-db"
-    exec sudo rm -f /usr/local/man/man1/autogit.1.gz
-    exec sudo rm -f /usr/local/man/man1/autogit.1
+    exec sudo rm -f /usr/share/man/man1/autogit.1.gz
 
     puts "Elaborating trigger for man-db"
     spawn -noecho sudo mandb
@@ -160,7 +163,6 @@ if { $cmd == "saio" } {
 
     set cmt [lindex $argv 1]
 
-    spawn -noecho git add *
     spawn -noecho git add .
     spawn -noecho git commit -m "$cmt"
 

@@ -21,7 +21,7 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 - run ```sudo ./installer --configure``` to run installer script. ```--configure``` option will run the configuration script entirely.
 
 ### usages
-- run ```autogit saio "commit msg example"``` for execute a "simple all in one" command aka ```git add *``` and ```git add .```, ```git commit -m "commit msg example"``` and ```git push```.
+- run ```autogit saio "commit msg example"``` for execute a "simple all in one" command aka ```git add .```, ```git commit -m "commit msg example"``` and ```git push```.
 - run ```autogit add *``` like ```git add *```.
 - run ```autogit uninstall --purge``` to complete uninstall this tool.
 
@@ -40,5 +40,8 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 
 ---
 
-#### version BETA 0.3
+# Next updates
+- need to improve data encryption
+
+#### version BETA 0.3.1
 
