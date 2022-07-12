@@ -18,9 +18,9 @@ This data is stored in /home/[user]/.autogit/supersecrets, previously encrypted 
 ## Guide
 
 #### installing
-- run ```sudo ./installer --configure``` to run installer script. ```--configure``` option will run the configuration script entirely.
+- run ```./installer --configure``` to run installer script. ```--configure``` option will run the configuration script entirely.
 By default the executable will be copyied into /usr/local/bin.
-- run ```sudo ./installer --configure --prefix <path>``` to run installer script. ```--configure``` option will run the configuration script entirely. ```--prefix <path>``` option will specify the location into install it.
+- run ```./installer --configure --prefix <path>``` to run installer script. ```--configure``` option will run the configuration script entirely. ```--prefix <path>``` option will specify the location into install it.
 
 ### usages
 - run ```autogit saio "commit msg example"``` for execute a "simple all in one" command aka ```git add .```, ```git commit -m "commit msg example"``` and ```git push```.

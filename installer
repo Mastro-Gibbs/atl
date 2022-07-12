@@ -5,6 +5,11 @@
 #
 # version BETA 0.3.1
 
+if [ $(whoami) == "root" ]; then
+    echo "[ERR] => run installer without sudo privileges"
+    exit -1
+fi
+
 if [ $# == 1 ]; then
     if [ $1 == "--help" ] || [ $1 == "-h" ]; then
         echo "installer [options]"
@@ -23,8 +28,6 @@ echo "==============================================="
 echo "             Autogit installer"
 echo "==============================================="
 echo
-
-
 
 if [ $# -gt 0 ]; then
     if [ $1 != "--prefix" ] && [ $1 != "--configure" ] && [ $1 != "--help" ] && [ $1 != "-h" ]; then
