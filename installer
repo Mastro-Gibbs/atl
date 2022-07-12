@@ -24,6 +24,15 @@ echo "             Autogit installer"
 echo "==============================================="
 echo
 
+
+
+if [ $# -gt 0 ]; then
+    if [ $1 != "--prefix" ] && [ $1 != "--configure" ] && [ $1 != "--help" ] && [ $1 != "-h" ]; then
+        echo "Option '$1' not recognized, please run ./installer --help"
+        exit -1
+    fi
+fi
+
 folder="/usr/local/bin"
 
 if [ $# -eq 2 ]; then
@@ -35,7 +44,8 @@ fi
 echo "Copying the executable into $folder.."
 
 i=$(whoami)
-if [ $(sudo -u $i test -w $folder) ]; then
+
+if ! $(touch "${folder}/test" 2> /dev/null ); then
     if ! sudo cp autogit $folder; then
         echo "An error occurred while copying executable, exiting"
         exit -1
