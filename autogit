@@ -6,12 +6,11 @@
 # version BETA 0.3
 
 proc complete {cmd} {
-    if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } {
+    if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
         puts "\[SUC\] => $cmd done, quitting.."
-        exit 0
+    } else {
+        puts "done."
     }
-    puts "done."
-    exit 0
 }
 
 
@@ -135,6 +134,8 @@ if { $cmd == "uninstall" } {
     spawn -noecho sudo mandb
 
     complete $cmd
+
+    exit 0
 }
 
 
@@ -165,15 +166,15 @@ if { $cmd == "saio" } {
 
     spawn -noecho git push
     expect {
-        timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-        eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+        timeout { puts "No auth required"; puts "done"; exit 1 }
+        eof { puts "No auth required"; puts "done"; exit 1 }
         "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
         "Username for 'https://github.com':"
     }
     send "$USERNAME\r"
     expect {
-        timeout { send_user "\nNo password needed\n"; exit 1 }
-        eof { send_user "\nNo password needed\n"; exit 1 }
+        timeout { puts "No auth required"; puts "done"; exit 1 }
+        eof { puts "No auth required"; puts "done"; exit 1 }
         "Password for 'https://$USERNAME@github.com':"
     }
     send "$TOKEN\r"
@@ -187,15 +188,15 @@ if { $cmd == "saio" } {
 
 spawn -noecho git $cmd {*}$args
 expect {
-    timeout { send_user "\nno auth required\n"; complete $cmd; exit 1 }
-    eof { send_user "\nno auth required\n"; complete $cmd; exit 1 }
+    timeout { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
+    eof { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
     "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
     "Username for 'https://github.com':"
 }
 send "$USERNAME\r"
 expect {
-    timeout { send_user "\nNo password needed\n"; exit 1 }
-    eof { send_user "\nNo password needed\n"; exit 1 }
+    timeout { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
+    eof { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
     "Password for 'https://$USERNAME@github.com':"
 }
 send "$TOKEN\r"
