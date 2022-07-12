@@ -35,9 +35,9 @@ fi
 
 folder="/usr/local/bin"
 
-if [ $# -eq 2 ]; then
-    if [ $1 == "--prefix" ]; then
-        folder=$2
+if [ $# -eq 3 ]; then
+    if [ $2 == "--prefix" ]; then
+        folder=$3
     fi
 fi
 
