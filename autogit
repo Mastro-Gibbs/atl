@@ -126,9 +126,11 @@ if { $cmd == "uninstall" } {
     puts "Removing soft link"
     exec sudo rm -f /usr/local/bin/autogit
 
-    puts "Removing installation folder"
-    set ifol [exec head -n1 /home/$i/.autogit/cache]
-    exec sudo rm -fr $ifol  
+    if {[file exists $conffile]} {
+        puts "Removing installation folder"
+        set ifol [exec head -n1 /home/$i/.autogit/cache]
+        exec sudo rm -fr $ifol  
+    }    
 
     puts "Removing entry for man-db"
     exec sudo rm -f /usr/share/man/man1/autogit.1.gz

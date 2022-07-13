@@ -5,7 +5,27 @@
 #
 # version BETA 0.3.2
 
-FOLDER="/usr/local/bin"
+echo "==============================================="
+echo "             Autogit installer"
+echo "==============================================="
+echo
+
+i=$(whoami)
+response="n"
+
+if [[ -f "/home/$i/.autogit/cache" ]]
+then
+    FIND=$(head -n1 /home/$i/.autogit/cache)
+    echo "A previous installation folder was found in $FIND, do you like override it? [y/n]"
+    read response
+fi
+
+if [ $response == "y" ] || [ $response == "Y" ]; then
+    FOLDER=$FIND
+else
+    FOLDER="/usr/local/bin"
+fi
+
 CONFIGURE="NO"
 HELP="NO"
 NOSUMAN="NO"
@@ -17,7 +37,11 @@ for i in "$@"; do
       shift 
       ;;
     -p=*|--prefix=*)
-      FOLDER="${i#*=}"
+      if [ $response == "y" ] || [ $response == "Y" ]; then
+        FOLDER=$FIND
+      else
+        FOLDER="${i#*=}"
+      fi
       shift 
       ;;
     -h|--help)
@@ -63,13 +87,6 @@ if [ $HELP == "YES" ]; then
     echo
     exit 0
 fi
-
-echo "==============================================="
-echo "             Autogit installer"
-echo "==============================================="
-echo
-
-i=$(whoami)
 
 if ! $(touch "${FOLDER}/test" 2> /dev/null ); then
     echo "Copying the executable into ${FOLDER}.."
