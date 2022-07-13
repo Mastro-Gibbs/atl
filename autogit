@@ -1,9 +1,9 @@
-#!/usr/bin/expect
+#!/usr/bin/expect -f
 #
 #
 # author stefano fattore
 #
-# version BETA 0.3.1
+# version BETA 0.3.2
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
@@ -18,8 +18,8 @@ proc help_section {arguments} {
     if { [llength $arguments] == 2 } {
         set cmd_help [lindex $arguments 1]
         if { $cmd_help == "git" } {
-            puts [exec man git]
-            puts ""
+            spawn -noecho man git
+            interact
             exit 0
         }
         spawn -noecho man git-$cmd_help
@@ -95,7 +95,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3.1 \[BETA\]"
+    puts "  0.3.2 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""

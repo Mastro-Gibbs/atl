@@ -3,7 +3,53 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.1
+# version BETA 0.3.2
+
+FULL="NO"
+DEPENDECIES="NO"
+USERDATA="NO"
+HELP="NO"
+COUNT=0
+
+for i in "$@"; do
+  COUNT=$((COUNT+1))
+  case $i in
+    -i|--initall)
+      FULL="YES"
+      USERDATA="NO"
+      DEPENDECIES="NO"
+      shift 
+      ;;
+    -d|--deps)
+      if [ $FULL == "YES" ]; then
+        echo "[ERR] => cannot combine -i|--initall with $i"
+        exit -1
+      fi
+      DEPENDECIES="YES"
+      shift 
+      ;;
+    -u|--userdata)
+      if [ $FULL == "YES" ]; then
+        echo "[ERR] => cannot combine -i|--initall with $i"
+        exit -1
+      fi
+      USERDATA="YES"
+      shift 
+      ;;
+    -h|--help)
+      HELP="YES"
+      shift 
+      ;;
+    -*|--*)
+      echo "Unknown option $i"
+      echo "Please run ./autogitconfigure --help"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
+
 
 signature(){
 cat << "EOF"
@@ -20,28 +66,29 @@ cat << "EOF"
 EOF
 }
 
-if [ $# == 1 ]; then
-    if [ $1 == "--help" ] || [ $1 == "-h" ]; then
-        echo "autogitconfigure [options]"
-        echo "  --initall"
-        echo "      set username and password, check for dep and install them"
-        echo
-        echo "  --userdata"
-        echo "      set username and password"
-        echo
-        echo "  --deps"
-        echo "      check for dep and install them"
-        echo
-        exit 0
-    fi
+if [ $HELP == "YES" ]; then
+    echo "autogitconfigure [options]"
+    echo "  -i|--initall"
+    echo "      set username and password, check for dep and install them"
+    echo
+    echo "  -u|--userdata"
+    echo "      set username and password"
+    echo
+    echo "  -d|--deps"
+    echo "      check for dep and install them"
+    echo
+    echo "  -h|--help"
+    echo "      check for dep and install them"
+    echo
+    exit 0
 fi
 
-if [ $# -eq 0 ]; then
+if [ $COUNT -eq 0 ]; then
     echo "[ERR] => No args detected, use --help for tips"
     exit -1
 fi
 
-if [ $# -eq 1 ]; then 
+if [ $# -gt 0 ]; then 
     signature
 fi
 
@@ -90,44 +137,49 @@ dependencies(){
     ARCH_PACKAGE_NAME="expect openssl"
 
     echo "Installing packages $PACKAGE on $(( lsb_release -ds || cat /etc/*release || uname -om ) 2>/dev/null | head -n1)"
-    echo
+    echo "Press [y/n] to proceed"
+    read response
 
-    if [ -x "$(command -v apt)" ]; then 
-        apt update
-        apt install -y $DEB_PACKAGE_NAME
-    elif [ -x "$(command -v pacman)" ]; then 
-        pacman -S $ARCH_PACKAGE_NAME
-    elif [ -x "$(command -v dnf)" ]; then
-        dnf install $FEDORA_PACKAGE_NAME
-    elif [ -x "$(command -v yum)" ]; then
-        yum update
-        yum install $PACKAGE
-    elif [ -x "$(command -v xbps)" ]; then
-        xbps-install -Su $PACKAGE
-    else 
-        echo "OS NOT DETECTED, couldn't install package $PACKAGE"
-        exit 1;
+    if [ $response == "y" ] || [ $response == "Y" ]; then 
+        if [ -x "$(command -v apt)" ]; then 
+            sudo apt update
+            sudo apt install -y $DEB_PACKAGE_NAME
+        elif [ -x "$(command -v pacman)" ]; then 
+            sudo pacman -S $ARCH_PACKAGE_NAME
+        elif [ -x "$(command -v dnf)" ]; then
+            sudo dnf install $FEDORA_PACKAGE_NAME
+        elif [ -x "$(command -v yum)" ]; then
+            sudo yum update
+            sudo yum install $PACKAGE
+        elif [ -x "$(command -v xbps)" ]; then
+            sudo xbps-install -Su $PACKAGE
+        else 
+            echo "OS NOT DETECTED, couldn't install package $PACKAGE"
+            exit 1;
+        fi
+
+        echo
+        echo "==============================================="
+        echo "Package $PACKAGE installed successfully"
+        echo "==============================================="
+    else
+        echo "Dependencies installation aborted, quitting"
     fi
-
-    echo
-    echo "==============================================="
-    echo "Package $PACKAGE installed successfully"
-    echo "==============================================="
 }
 
-if [ $1 == "--userdata" ]; then
+if [ $USERDATA == "YES" ]; then
     user_data
     echo "done"
 
 fi
 
-if [ $1 == "--deps" ]; then
+if [ $DEPENDECIES == "YES" ]; then
     dependencies
 
     echo "done"
 fi
 
-if [ $1 == "--initall" ]; then
+if [ $FULL == "YES" ]; then
     user_data
     
     dependencies

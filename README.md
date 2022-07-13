@@ -45,5 +45,5 @@ By default the executable will be copyied into /usr/local/bin.
 # Next updates
 - need to improve data encryption
 
-#### version BETA 0.3.1
+#### version BETA 0.3.2
 

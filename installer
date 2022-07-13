@@ -3,25 +3,65 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.1
+# version BETA 0.3.2
 
-if [ $(whoami) == "root" ]; then
-    echo "[ERR] => run installer without sudo privileges"
+FOLDER="/usr/local/bin"
+CONFIGURE="NO"
+HELP="NO"
+NOSUMAN="NO"
+
+for i in "$@"; do
+  case $i in
+    -c|--configure)
+      CONFIGURE="YES"
+      shift 
+      ;;
+    -p=*|--prefix=*)
+      FOLDER="${i#*=}"
+      shift 
+      ;;
+    -h|--help)
+      HELP="YES"
+      shift 
+      ;;
+    -*|--*)
+      echo "Unknown option $i"
+      echo "Please run ./installer --help"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [ ${FOLDER: -1} != "/" ]; then
+    FOLDER="${FOLDER}/"
+fi
+
+if [[ ! -d $FOLDER ]]
+then
+    echo "[ERR] => given path -> $FOLDER does not exits, quitting.."
     exit -1
 fi
 
-if [ $# == 1 ]; then
-    if [ $1 == "--help" ] || [ $1 == "-h" ]; then
-        echo "installer [options]"
-        echo
-        echo "  --configure"
-        echo "      initializes the configuration process"
-        echo
-        echo "  --prefix <path>"
-        echo "      specifies the installation path" 
-        echo
-        exit 0
-    fi
+if [ $(whoami) == "root" ]; then
+    echo "[ERR] => re-run installer without sudo privileges"
+    exit -1
+fi
+
+if [ $HELP == "YES" ]; then
+    echo "installer [options]"
+    echo
+    echo "  -c|--configure"
+    echo "      initializes the configuration process"
+    echo
+    echo "  -p|--prefix=<path>"
+    echo "      specifies the installation path" 
+    echo
+    echo "  -h|--help"
+    echo "      run helper"
+    echo
+    exit 0
 fi
 
 echo "==============================================="
@@ -29,43 +69,49 @@ echo "             Autogit installer"
 echo "==============================================="
 echo
 
-if [ $# -gt 0 ]; then
-    if [ $1 != "--prefix" ] && [ $1 != "--configure" ] && [ $1 != "--help" ] && [ $1 != "-h" ]; then
-        echo "Option '$1' not recognized, please run ./installer --help"
-        exit -1
-    fi
-fi
-
-folder="/usr/local/bin"
-
-if [ $# -eq 3 ]; then
-    if [ $2 == "--prefix" ]; then
-        folder=$3
-    fi
-fi
-
-echo "Copying the executable into $folder.."
-
 i=$(whoami)
 
-if ! $(touch "${folder}/test" 2> /dev/null ); then
+if ! $(touch "${FOLDER}/test" 2> /dev/null ); then
+    echo "Copying the executable into ${FOLDER}.."
     echo "Need sudo privileges to copy the executable.." 
-    if ! sudo cp autogit $folder; then
+    if ! sudo cp autogit $FOLDER; then
         echo "An error occurred while copying executable, exiting"
         exit -1
     fi
 else
-    if [[ ! -d "${folder}autogit" ]]
+    echo "Copying the executable into ${FOLDER}Autogit/bin.."
+    if ! rm -f "${FOLDER}test"; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+
+    if [[ ! -d "${FOLDER}Autogit" ]]
     then
-        if ! mkdir "${folder}autogit"; then
+        if ! mkdir "${FOLDER}Autogit"; then
             echo "An error occurred, exiting"
             exit -1
         fi
     fi
 
-    if [[ ! -d "${folder}autogit/bin" ]]
+    if [[ ! -d "${FOLDER}Autogit/bin" ]]
     then
-        if ! mkdir "${folder}autogit/bin"; then
+        if ! mkdir "${FOLDER}Autogit/bin"; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+
+    if [[ ! -d "${FOLDER}Autogit/man" ]]
+    then
+        if ! mkdir "${FOLDER}Autogit/man"; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+
+    if [[ ! -d "${FOLDER}Autogit/man/man1" ]]
+    then
+        if ! mkdir "${FOLDER}Autogit/man/man1"; then
             echo "An error occurred, exiting"
             exit -1
         fi
@@ -91,32 +137,43 @@ else
         fi
     fi
 
-    if ! echo "${folder}autogit" > /home/$i/.autogit/cache ; then
+    if ! echo "${FOLDER}Autogit" > /home/$i/.autogit/cache ; then
         echo "An error occurred, exiting"
         exit -1
     fi
 
-    if ! cp autogit "${folder}autogit/bin"; then
+    if ! cp autogit "${FOLDER}Autogit/bin"; then
         echo "An error occurred while copying executable, exiting"
         exit -1
     fi
 
+    {
+        NOSUMAN="YES"
+        if ! rm -f ${FOLDER}Autogit/man/man1/autogit.1.gz; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+        if ! cp autogit.1 ${FOLDER}Autogit/man/man1; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+        if ! gzip ${FOLDER}Autogit/man/man1/autogit.1; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+        if ! rm -f ${FOLDER}Autogit/man/man1/autogit.1; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    } &> /dev/null
+
+    echo "done"
     echo
     echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
     read response 
 
     if [ $response == "Y" ] || [ $response == "y" ]; then
-        if [[ -f "/usr/local/bin/autogit" ]]
-        then
-            if ! sudo rm -f /usr/local/bin/autogit; then
-                echo "An error occurred, exiting"
-                exit -1
-            else
-                echo "Removing prevoius soft link"
-            fi
-        fi
-        
-        if ! sudo ln -s "${folder}autogit/bin/autogit" /usr/local/bin/autogit; then
+        if ! sudo ln -sf "${FOLDER}Autogit/bin/autogit" /usr/local/bin/autogit; then
             echo "An error occurred while creating symbolic link, exiting"
             exit -1
         else 
@@ -142,24 +199,30 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
         fi
     fi
 
-    {
-        if ! sudo rm -f /usr/share/man/man1/autogit.1.gz; then
-            echo "An error occurred while generating entry for man, exiting"
-            exit -1
-        fi
-        if ! sudo cp autogit.1 /usr/share/man/man1; then
-            echo "An error occurred while generating entry for man, exiting"
-            exit -1
-        fi
-        if ! sudo gzip /usr/share/man/man1/autogit.1; then
-            echo "An error occurred while generating entry for man, exiting"
-            exit -1
-        fi
-        if ! sudo rm -f /usr/share/man/man1/autogit.1; then
-            echo "An error occurred while removing autogit cache for man, exiting"
-            exit -1
-        fi
-    } &> /dev/null
+    if [ $NOSUMAN == "YES" ]; then
+        {
+            if ! sudo ln -sf "${FOLDER}Autogit/man/man1/autogit.1.gz" /usr/share/man/man1/autogit.1.gz; then
+                echo "An error occurred while generating entry for man, exiting"
+                exit -1
+            fi
+        } &> /dev/null
+    else
+        {
+            if ! sudo cp autogit.1 /usr/share/man/man1; then
+                echo "An error occurred while generating entry for man, exiting"
+                exit -1
+            fi
+            if ! sudo gzip /usr/share/man/man1/autogit.1; then
+                echo "An error occurred while generating entry for man, exiting"
+                exit -1
+            fi
+            if ! sudo rm -f /usr/share/man/man1/autogit.1; then
+                echo "An error occurred while removing autogit cache for man, exiting"
+                exit -1
+            fi
+        } &> /dev/null
+    fi
+    
 
     echo
     echo "Running trigger for man-db.."
@@ -175,13 +238,9 @@ else
     echo "Generating new entry for man aborted."
 fi
 
-
-
 echo "done"
 
-if [ $# == 1 ]; then
+if [ $CONFIGURE == "YES" ]; then
     echo
-    if [ $1 == "--configure" ]; then
-        exec ./autogitconfigure --initall
-    fi
+    exec ./autogitconfigure --initall
 fi
