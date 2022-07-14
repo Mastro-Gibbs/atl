@@ -73,7 +73,7 @@ proc parseargs {argc argv} {
     foreach {val} $argv {
         set err "\[ERR\] => cannot use '$val' in this way, run autogit --help"
 
-        if { $val == "saio" } {
+        if { $val == "saio" && $argc != 1 } {
             set saio 1
         }
 
@@ -89,7 +89,7 @@ proc parseargs {argc argv} {
         } elseif { $val == "saio" && $i == 0 && $argc == 1 } {
             puts $err; 
             exit -1 
-        } elseif { $argc != 1 && $saio } {
+        } elseif { $argc != 1 && $saio && !$warn } {
             set warn 0
         } elseif { $val != "-v" && $val != "--version" && $val != "-h" && $val != "--help" && !$saio } {
             set warn 1
