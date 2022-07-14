@@ -34,16 +34,14 @@ By default the executable will be copyied into /usr/local/bin.
 ---
 
 # Last updates
-- add support for some pkg managers
-- now can run all git commands
 - modified man page
 - fixed some bugs
-- merged uninstall script into autogit
+- better args parsing 
 
 ---
 
 # Next updates
 - need to improve data encryption
 
-#### version BETA 0.3.2
+#### version BETA 0.3.3
 

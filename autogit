@@ -1,9 +1,9 @@
-#!/usr/bin/expect -f
+#!/usr/bin/expect --
 #
 #
 # author stefano fattore
 #
-# version BETA 0.3.2
+# version BETA 0.3.3
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
@@ -65,11 +65,51 @@ proc help_section {arguments} {
     exit 0
 }
 
+proc parseargs {argc argv} {
+    set i 0
+    set warn 0
+    set saio 0
+
+    foreach {val} $argv {
+        set err "\[ERR\] => cannot use '$val' in this way, run autogit --help"
+
+        if { $val == "saio" } {
+            set saio 1
+        }
+
+        if { $val == "--purge" && $i == 0 } {
+            puts $err; 
+            exit -1 
+        } elseif { $val == "uninstall" && $i != 0 } {
+            puts $err; 
+            exit -1 
+        } elseif { $val == "saio" && $i != 0 } {
+            puts $err; 
+            exit -1 
+        } elseif { $val == "saio" && $i == 0 && $argc == 1 } {
+            puts $err; 
+            exit -1 
+        } elseif { $argc != 1 && $saio } {
+            set warn 0
+        } elseif { $val != "-v" && $val != "--version" && $val != "-h" && $val != "--help" && !$saio } {
+            set warn 1
+        }
+        incr $i
+    }
+
+    if { $warn } {
+        puts "\[WARN\] => unknown command/option '$argv' for autogit, proceeding with git"
+    }
+    
+}
+
 
 if { [llength $argv] == 0 } {
     puts "\[WARN\] => args required, running help.."
     sleep 1
     help_section $argv
+} else {
+    parseargs $argc $argv
 }
 
 
@@ -95,7 +135,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3.2 \[BETA\]"
+    puts "  0.3.3 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
