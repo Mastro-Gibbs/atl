@@ -203,7 +203,7 @@ if { $cmd == "saio" } {
         exit -1
     }
 
-    set cmt [lindex $argv 1 end]
+    set cmt [lrange $argv 1 end]
 
     spawn -noecho git add .
     spawn -noecho git commit -m "$cmt"
