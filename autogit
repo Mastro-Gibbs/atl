@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.3
+# version BETA 0.3.4
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
@@ -135,7 +135,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3.3 \[BETA\]"
+    puts "  0.3.4 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
