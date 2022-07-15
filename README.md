@@ -40,5 +40,10 @@ By default the executable will be copyied into /usr/local/bin.
 
 ---
 
+# TODO
+- testing
+
+---
+
 #### version BETA 0.4
 
