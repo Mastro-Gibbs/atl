@@ -45,5 +45,5 @@ By default the executable will be copyied into /usr/local/bin.
 
 ---
 
-#### version BETA 0.4
+#### version BETA 0.4.2
 

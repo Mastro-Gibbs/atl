@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4
+# version BETA 0.4.2
 
 
 FULL="NO"
@@ -150,6 +150,7 @@ user_data(){
     echo "" > /home/$i/.autogit/supersecrets
 
     echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr > /home/$i/.autogit/supersecrets
+    echo "-?-" >> /home/$i/.autogit/supersecrets
     echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr >> /home/$i/.autogit/supersecrets
 }
 

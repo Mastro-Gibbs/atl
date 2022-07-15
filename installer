@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.4
+# version BETA 0.4.2
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"
@@ -64,11 +64,6 @@ for i in "$@"; do
 done
 # ARGS parser end
 
-if [ $CONFIGURE == "YES" ]; then
-    echo
-    exec ./autogitconfigure --initall
-fi
-
 # DIR selector
 i=$(whoami)
 response="n"
@@ -76,8 +71,11 @@ response="n"
 if [[ -f "/home/$i/.autogit/cache" ]]
 then
     FIND=$(head -n1 /home/$i/.autogit/cache)
-    echo "A previous installation folder was found in $FIND, do you like override it? [y/n]"
-    read response
+    if [[ $FIND != "" ]]
+    then
+        echo "A previous installation folder was found in $FIND, do you like override it? [y/n]"
+        read response
+    fi
 fi
 
 if [ $response == "y" ] || [ $response == "Y" ]; then
@@ -250,6 +248,14 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
     else
         # man cp and gz it( sudo )
         {
+            if ! sudo rm -f /usr/share/man/man1/autogit.1; then
+                echo "An error occurred while removing autogit cache for man, exiting"
+                exit -1
+            fi
+            if ! sudo rm -f /usr/share/man/man1/autogit.1.gz; then
+                echo "An error occurred while removing autogit cache for man, exiting"
+                exit -1
+            fi
             if ! sudo cp autogit.1 /usr/share/man/man1; then
                 echo "An error occurred while generating entry for man, exiting"
                 exit -1
@@ -282,3 +288,10 @@ fi
 # man generation end
 
 echo "done"
+echo 
+
+if [ $CONFIGURE == "YES" ]; then
+    echo
+    exec ./autogitconfigure --initall
+fi
+
