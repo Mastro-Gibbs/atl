@@ -36,12 +36,9 @@ By default the executable will be copyied into /usr/local/bin.
 # Last updates
 - modified man page
 - fixed some bugs
-- better args parsing 
+- improved encr
 
 ---
 
-# Next updates
-- need to improve data encryption
-
-#### version BETA 0.3.4
+#### version BETA 0.4
 

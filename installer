@@ -5,11 +5,71 @@
 #
 # version BETA 0.3.4
 
+if [ $(whoami) == "root" ]; then
+    echo "[ERR] => re-run installer without sudo privileges"
+    exit -1
+fi
+
 echo "==============================================="
 echo "             Autogit installer"
 echo "==============================================="
 echo
 
+CONFIGURE="NO"
+NOSUMAN="NO"
+PREFIX="NO"
+FOLDER=""
+
+
+# ARGS parser
+for i in "$@"; do
+  case $i in
+    -c|--configure)
+        CONFIGURE="YES"
+        shift 
+        ;;
+    -p=*|--prefix=*)
+        PREFIX="YES"
+        FOLDER="${i#*=}"
+        if [[ ! -d $FOLDER ]]
+        then
+            echo "[ERR] => given path -> $FOLDER does not exits, quitting.."
+            exit -1
+        fi
+        shift 
+        ;;
+    -h|--help)
+        echo "installer [options]"
+        echo
+        echo "  -c|--configure"
+        echo "      initializes the configuration process"
+        echo
+        echo "  -p|--prefix=<path>"
+        echo "      specifies the installation path" 
+        echo
+        echo "  -h|--help"
+        echo "      run helper"
+        echo
+        exit 0
+        shift 
+        ;;
+    -*|--*)
+        echo "Unknown option $i"
+        echo "Please run ./installer --help"
+        exit 1
+        ;;
+    *)
+        ;;
+  esac
+done
+# ARGS parser end
+
+if [ $CONFIGURE == "YES" ]; then
+    echo
+    exec ./autogitconfigure --initall
+fi
+
+# DIR selector
 i=$(whoami)
 response="n"
 
@@ -22,73 +82,34 @@ fi
 
 if [ $response == "y" ] || [ $response == "Y" ]; then
     FOLDER=$FIND
-else
+elif [ $PREFIX == "NO" ]; then
     FOLDER="/usr/local/bin"
+else
+    if [ $response != "y" ] || [ $response != "Y" ]; then
+        if ! rm -rf $FIND; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
+    FOLDER="${FOLDER}/Autogit"
+    if [[ ! -d "${FOLDER}" ]]
+    then
+        if ! mkdir "${FOLDER}"; then
+            echo "An error occurred, exiting"
+            exit -1
+        fi
+    fi
 fi
-
-CONFIGURE="NO"
-HELP="NO"
-NOSUMAN="NO"
-
-for i in "$@"; do
-  case $i in
-    -c|--configure)
-      CONFIGURE="YES"
-      shift 
-      ;;
-    -p=*|--prefix=*)
-      if [ $response == "y" ] || [ $response == "Y" ]; then
-        FOLDER=$FIND
-      else
-        FOLDER="${i#*=}"
-      fi
-      shift 
-      ;;
-    -h|--help)
-      HELP="YES"
-      shift 
-      ;;
-    -*|--*)
-      echo "Unknown option $i"
-      echo "Please run ./installer --help"
-      exit 1
-      ;;
-    *)
-      ;;
-  esac
-done
 
 if [ ${FOLDER: -1} != "/" ]; then
     FOLDER="${FOLDER}/"
 fi
+# DIR selector end
 
-if [[ ! -d $FOLDER ]]
-then
-    echo "[ERR] => given path -> $FOLDER does not exits, quitting.."
-    exit -1
-fi
-
-if [ $(whoami) == "root" ]; then
-    echo "[ERR] => re-run installer without sudo privileges"
-    exit -1
-fi
-
-if [ $HELP == "YES" ]; then
-    echo "installer [options]"
-    echo
-    echo "  -c|--configure"
-    echo "      initializes the configuration process"
-    echo
-    echo "  -p|--prefix=<path>"
-    echo "      specifies the installation path" 
-    echo
-    echo "  -h|--help"
-    echo "      run helper"
-    echo
-    exit 0
-fi
-
-if ! $(touch "${FOLDER}/test" 2> /dev/null ); then
+# Installer
+if ! $(touch "${FOLDER}test" 2> /dev/null ); then
+    # sudo part
+    
     echo "Copying the executable into ${FOLDER}.."
     echo "Need sudo privileges to copy the executable.." 
     if ! sudo cp autogit $FOLDER; then
@@ -96,39 +117,35 @@ if ! $(touch "${FOLDER}/test" 2> /dev/null ); then
         exit -1
     fi
 else
-    echo "Copying the executable into ${FOLDER}Autogit/bin.."
+    # no sudo part
+    echo "Copying the executable into ${FOLDER}"
+
+    # rm previous created file 
     if ! rm -f "${FOLDER}test"; then
         echo "An error occurred, exiting"
         exit -1
     fi
 
-    if [[ ! -d "${FOLDER}Autogit" ]]
+    # DIRS & FILES checking/copying
+    if [[ ! -d "${FOLDER}bin" ]]
     then
-        if ! mkdir "${FOLDER}Autogit"; then
+        if ! mkdir "${FOLDER}/bin"; then
             echo "An error occurred, exiting"
             exit -1
         fi
     fi
 
-    if [[ ! -d "${FOLDER}Autogit/bin" ]]
+    if [[ ! -d "${FOLDER}man" ]]
     then
-        if ! mkdir "${FOLDER}Autogit/bin"; then
+        if ! mkdir "${FOLDER}/man"; then
             echo "An error occurred, exiting"
             exit -1
         fi
     fi
 
-    if [[ ! -d "${FOLDER}Autogit/man" ]]
+    if [[ ! -d "${FOLDER}man/man1" ]]
     then
-        if ! mkdir "${FOLDER}Autogit/man"; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-    fi
-
-    if [[ ! -d "${FOLDER}Autogit/man/man1" ]]
-    then
-        if ! mkdir "${FOLDER}Autogit/man/man1"; then
+        if ! mkdir "${FOLDER}/man/man1"; then
             echo "An error occurred, exiting"
             exit -1
         fi
@@ -154,43 +171,47 @@ else
         fi
     fi
 
-    if ! echo "${FOLDER}Autogit" > /home/$i/.autogit/cache ; then
+    if ! echo "${FOLDER}" > /home/$i/.autogit/cache ; then
         echo "An error occurred, exiting"
         exit -1
     fi
 
-    if ! cp autogit "${FOLDER}Autogit/bin"; then
+    if ! cp autogit "${FOLDER}bin"; then
         echo "An error occurred while copying executable, exiting"
         exit -1
     fi
+    # DIRS & FILES checking/copying end
 
+    # MAN 
     {
         NOSUMAN="YES"
-        if ! rm -f ${FOLDER}Autogit/man/man1/autogit.1.gz; then
+        if ! rm -f ${FOLDER}man/man1/autogit.1.gz; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! cp autogit.1 ${FOLDER}Autogit/man/man1; then
+        if ! cp autogit.1 ${FOLDER}man/man1; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! gzip ${FOLDER}Autogit/man/man1/autogit.1; then
+        if ! gzip ${FOLDER}man/man1/autogit.1; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! rm -f ${FOLDER}Autogit/man/man1/autogit.1; then
+        if ! rm -f ${FOLDER}man/man1/autogit.1; then
             echo "An error occurred, exiting"
             exit -1
         fi
     } &> /dev/null
+    # MAN end
 
+    # autogit SOFT LINK to /usr/local/bin
     echo "done"
     echo
     echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
     read response 
 
     if [ $response == "Y" ] || [ $response == "y" ]; then
-        if ! sudo ln -sf "${FOLDER}Autogit/bin/autogit" /usr/local/bin/autogit; then
+        if ! sudo ln -sf "${FOLDER}bin/autogit" /usr/local/bin/autogit; then
             echo "An error occurred while creating symbolic link, exiting"
             exit -1
         else 
@@ -199,8 +220,10 @@ else
     else
         echo "Generating new soft link aborted."
     fi
+    # autogit SOFT LINK to /usr/local/bin end
 fi
 
+# man generation
 echo
 echo "Do you want to generate an entry for man? needs sudo permissions [y/n]"
 read response 
@@ -217,13 +240,15 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
     fi
 
     if [ $NOSUMAN == "YES" ]; then
+        # man SOFT LINK ( no sudo )
         {
-            if ! sudo ln -sf "${FOLDER}Autogit/man/man1/autogit.1.gz" /usr/share/man/man1/autogit.1.gz; then
+            if ! sudo ln -sf "${FOLDER}man/man1/autogit.1.gz" /usr/share/man/man1/autogit.1.gz; then
                 echo "An error occurred while generating entry for man, exiting"
                 exit -1
             fi
         } &> /dev/null
     else
+        # man cp and gz it( sudo )
         {
             if ! sudo cp autogit.1 /usr/share/man/man1; then
                 echo "An error occurred while generating entry for man, exiting"
@@ -254,10 +279,6 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
 else
     echo "Generating new entry for man aborted."
 fi
+# man generation end
 
 echo "done"
-
-if [ $CONFIGURE == "YES" ]; then
-    echo
-    exec ./autogitconfigure --initall
-fi

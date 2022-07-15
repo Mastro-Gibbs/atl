@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.4
+# version BETA 0.4
 
 
 FULL="NO"
@@ -12,6 +12,7 @@ USERDATA="NO"
 HELP="NO"
 COUNT=0
 
+# ARGS parser
 for i in "$@"; do
   COUNT=$((COUNT+1))
   case $i in
@@ -50,7 +51,7 @@ for i in "$@"; do
       ;;
   esac
 done
-
+# ARGS parser end
 
 signature(){
 cat << "EOF"
@@ -84,32 +85,61 @@ if [ $HELP == "YES" ]; then
     exit 0
 fi
 
+# ARGS check
 if [ $COUNT -eq 0 ]; then
     echo "[ERR] => No args detected, use --help for tips"
     exit -1
 elif [ $COUNT -gt 0 ]; then 
     signature
 fi
+# ARGS check end
 
 i=$(who | awk '{print $1}' | head -n 1)
+basedir="/home/$i/.autogit"
 
-if [[ ! -d "/home/$i/.autogit" ]]
+
+# DIRS & FILES checking/gen
+if [[ ! -d $basedir ]]
 then
-    echo "Created /home/$i/.autogit folder.."
-    mkdir /home/$i/.autogit
+    echo "Created ${basedir} folder.."
+    mkdir ${basedir}
 fi
 
-if [[ ! -f "/home/$i/.autogit/supersecrets" ]]
+if [[ ! -f "${basedir}/supersecrets" ]]
 then
-    echo "Created /home/$i/.autogit/supersecrets file.."
-    touch /home/$i/.autogit/supersecrets
+    echo "Created ${basedir}/supersecrets file.."
+    touch ${basedir}/supersecrets
 fi
+
+if [[ ! -f "${basedir}/cache" ]]
+then
+    echo "Created ${basedir}/cache file.."
+    touch ${basedir}/cache
+fi
+
+if [[ ! -d "${basedir}/conf" ]]
+then
+    echo "Created ${basedir}/conf folder.."
+    mkdir ${basedir}/conf
+fi
+
+if [[ -f "${basedir}/conf/encr" ]]
+then
+    rm -f ${basedir}/conf/encr
+    echo "Created ${basedir}/conf file.."
+    touch ${basedir}/conf/encr
+fi
+# DIRS & FILES checking/gen end
+
 
 user_data(){
     echo "==============================================="
     echo "          Set up your git credentials"
     echo "==============================================="
     echo    
+
+    head -c 256 /dev/random | base64 > /home/$i/.autogit/conf/encr  # gen rand pass
+    chmod 0400 ${basedir}/conf/encr                                 # set minimal privs
 
     echo "> Set username: "
     read uname
@@ -119,8 +149,8 @@ user_data(){
 
     echo "" > /home/$i/.autogit/supersecrets
 
-    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some > /home/$i/.autogit/supersecrets
-    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass pass:some >> /home/$i/.autogit/supersecrets
+    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr > /home/$i/.autogit/supersecrets
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr >> /home/$i/.autogit/supersecrets
 }
 
 

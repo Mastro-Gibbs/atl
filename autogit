@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.4
+# version BETA 0.4
 
 proc complete {cmd} {
     if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" || $cmd == "saio" } {
@@ -58,7 +58,7 @@ proc help_section {arguments} {
     puts "      uninstall \[--purge\]
             Uninstall autogit. It can be combined with --purge option to remove conf folder."
     puts ""
-    puts "\"like git command but more lazy\""
+    puts "\"like git command but more lazier\""
     puts ""
     puts "run \[-h|--help\] <git command> to view his man page"
     puts ""
@@ -69,12 +69,17 @@ proc parseargs {argc argv} {
     set i 0
     set warn 0
     set saio 0
+    set unin 0
 
     foreach {val} $argv {
         set err "\[ERR\] => cannot use '$val' in this way, run autogit --help"
 
         if { $val == "saio" && $argc != 1 } {
             set saio 1
+        }
+
+        if { $val == "uninstall" && $argc != 0 } {
+            set unin 1
         }
 
         if { $val == "--purge" && $i == 0 } {
@@ -89,12 +94,12 @@ proc parseargs {argc argv} {
         } elseif { $val == "saio" && $i == 0 && $argc == 1 } {
             puts $err; 
             exit -1 
-        } elseif { $argc != 1 && $saio && !$warn } {
+        } elseif { $argc != 1 && $saio && $unin && !$warn } {
             set warn 0
-        } elseif { $val != "-v" && $val != "--version" && $val != "-h" && $val != "--help" && !$saio } {
+        } elseif { $val != "-v" && $val != "--version" && $val != "-h" && $val != "--help" && !$saio && !$unin } {
             set warn 1
         }
-        incr $i
+        set i [expr {$i + 1}]
     }
 
     if { $warn } {
@@ -135,7 +140,7 @@ if { $cmd == "--version" || $cmd == "-v" } {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3.4 \[BETA\]"
+    puts "  0.4 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -192,8 +197,8 @@ if {![file exists $conffile]} {
     puts "configuration not found! please run autogitconfigure!"
     exit -1
 }
-set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
-set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass pass:some]
+set USERNAME [exec head -n 1 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$conffolder/conf/encr]
+set TOKEN [exec tail -n 2 $conffile | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$conffolder/conf/encr]
 
 
 if { $cmd == "saio" } {
