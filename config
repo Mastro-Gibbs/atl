@@ -198,7 +198,7 @@ dependencies(){
         if [ $response == "y" ] || [ $response == "Y" ]; then 
             if [ -x "$(command -v apt)" ]; then 
                 sudo apt update
-                sudo apt install -y $PACKAGE
+                sudo apt install $PACKAGE openssh-client
             elif [ -x "$(command -v pacman)" ]; then 
                 sudo pacman -S $PACKAGE
             elif [ -x "$(command -v dnf)" ]; then
