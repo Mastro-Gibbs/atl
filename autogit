@@ -218,15 +218,13 @@ set TOKEN [exec cat $supersecrets | sed -n -e "/-?-/,\$p" | sed "1d" | openssl a
 
 if { $cmd == "saio" } {
     if { [llength $argv] == 1 } {
-        puts "\[ERR\] => args required with 'saio' command, aborting.."
-        puts "run with option --help for tips"
+        puts "\[ERR\] => args required for 'saio' command, aborting.."
+        puts "run with autogit --help for tips"
         exit -1
     }
 
-    set cmt [lrange $argv 1 end]
-
     spawn -noecho git add .
-    spawn -noecho git commit -m "$cmt"
+    spawn -noecho git commit -m "{*}$args"
 
     spawn -noecho git push
     expect {
