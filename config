@@ -29,14 +29,22 @@ for i in "$@"; do
       DEPENDECIES="YES"
       shift 
       ;;
-    -u|--userdata)
-      if [ $FULL == "YES" ]; then
-        echo "[ERR] => cannot combine -i|--initall with $i"
-        exit -1
-      fi
-      USERDATA="YES"
-      shift 
-      ;;
+    -u=*|--userdata=*)
+        TYPE="${i#*=}"
+
+        if [ $TYPE != "git" ] && [ $TYPE != "ssh" ]; then
+            echo "Unknown option $TYPE"
+            echo "Please run ./config --help"
+            exit 1
+        fi 
+
+        if [ $FULL == "YES" ]; then
+            echo "[ERR] => cannot combine -i|--initall with $i"
+            exit -1
+        fi
+        USERDATA="YES"
+        shift 
+        ;;
     -h|--help)
       HELP="YES"
       shift 
