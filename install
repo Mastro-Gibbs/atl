@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4.2
+# version BETA 0.4.3
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"
@@ -39,7 +39,7 @@ for i in "$@"; do
         shift 
         ;;
     -h|--help)
-        echo "installer [options]"
+        echo "install [options]"
         echo
         echo "  -c|--configure"
         echo "      initializes the configuration process"
@@ -55,7 +55,7 @@ for i in "$@"; do
         ;;
     -*|--*)
         echo "Unknown option $i"
-        echo "Please run ./installer --help"
+        echo "Please run ./install --help"
         exit 1
         ;;
     *)

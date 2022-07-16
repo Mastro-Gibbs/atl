@@ -3,8 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4.2
-
+# version BETA 0.4.3
 
 FULL="NO"
 DEPENDECIES="NO"
@@ -44,7 +43,7 @@ for i in "$@"; do
       ;;
     -*|--*)
       echo "Unknown option $i"
-      echo "Please run ./autogitconfigure --help"
+      echo "Please run ./config --help"
       exit 1
       ;;
     *)
@@ -69,7 +68,7 @@ EOF
 }
 
 if [ $HELP == "YES" ]; then
-    echo "autogitconfigure [options]"
+    echo "config [options]"
     echo "  -i|--initall"
     echo "      set username and password, check for dep and install them"
     echo
@@ -105,12 +104,6 @@ then
     mkdir ${basedir}
 fi
 
-if [[ ! -f "${basedir}/supersecrets" ]]
-then
-    echo "Created ${basedir}/supersecrets file.."
-    touch ${basedir}/supersecrets
-fi
-
 if [[ ! -f "${basedir}/cache" ]]
 then
     echo "Created ${basedir}/cache file.."
@@ -122,24 +115,34 @@ then
     echo "Created ${basedir}/conf folder.."
     mkdir ${basedir}/conf
 fi
-
-if [[ -f "${basedir}/conf/encr" ]]
-then
-    rm -f ${basedir}/conf/encr
-    echo "Created ${basedir}/conf file.."
-    touch ${basedir}/conf/encr
-fi
 # DIRS & FILES checking/gen end
 
 
 user_data(){
+    echo
     echo "==============================================="
     echo "          Set up your git credentials"
     echo "==============================================="
     echo    
 
-    head -c 256 /dev/random | base64 > /home/$i/.autogit/conf/encr  # gen rand pass
-    chmod 0400 ${basedir}/conf/encr                                 # set minimal privs
+    if [[ -f "${basedir}/conf/encr" ]]
+    then
+        rm -f ${basedir}/conf/encr
+    fi
+
+    if [[ -f "${basedir}/supersecrets" ]]
+    then
+        rm -f ${basedir}/supersecrets
+    fi
+
+    echo "Created ${basedir}/conf file.."
+    touch ${basedir}/conf/encr
+
+    echo "Created ${basedir}/supersecrets file.."
+    touch ${basedir}/supersecrets
+
+    head -c 256 /dev/random | base64 > ${basedir}/conf/encr  # gen rand pass
+    chmod 0400 ${basedir}/conf/encr                          # set minimal privs
 
     echo "> Set username: "
     read uname
@@ -147,39 +150,43 @@ user_data(){
     echo "> Set password/token: (no-echo)"
     read -s passwd
 
-    echo "" > /home/$i/.autogit/supersecrets
+    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr > ${basedir}/supersecrets
+    echo "-?-" >> ${basedir}/supersecrets
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr >> ${basedir}/supersecrets
 
-    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr > /home/$i/.autogit/supersecrets
-    echo "-?-" >> /home/$i/.autogit/supersecrets
-    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr >> /home/$i/.autogit/supersecrets
+    chmod 0400 ${basedir}/supersecrets                       # set minimal privs
 }
 
 
 dependencies(){
+    echo
     echo "==============================================="
     echo "           Checking dependencies"
     echo "==============================================="
     echo
 
     PACKAGE=""
-    PACKAGE1=""
-    PACKAGE2=""
+    REQUIRED_PKG=()
 
     if ! type "expect" &> /dev/null; then
-        PACKAGE1="expect"
+        REQUIRED_PKG+=("expect")
     fi
     if ! type "openssl" &> /dev/null; then
-        PACKAGE2="openssl"
+        REQUIRED_PKG+=("openssl")
     fi
-    PACKAGE="${PACKAGE1} ${PACKAGE2}"
+    if ! type "git" &> /dev/null; then
+        REQUIRED_PKG+=("git")
+    fi
 
-    if [[ $PACKAGE == " " ]]
-    then
+    if [ ${#REQUIRED_PKG[@]} -eq 0 ]; then
         echo "==============================================="
         echo "       All dependencies are satisfied"
         echo "==============================================="
         echo
     else
+        PACKAGE=$(printf " %s" "${REQUIRED_PKG[@]}")
+        PACKAGE=${PACKAGE:1}
+
         echo "==============================================="
         echo "           Installing dependencies"
         echo "==============================================="
