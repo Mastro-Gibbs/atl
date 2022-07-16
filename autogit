@@ -224,7 +224,7 @@ if { $cmd == "saio" } {
     }
 
     spawn -noecho git add .
-    spawn -noecho git commit -m "{*}$args"
+    spawn -noecho git commit -m "$args"
 
     spawn -noecho git push
     expect {
