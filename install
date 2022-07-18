@@ -10,59 +10,79 @@ if [ $(whoami) == "root" ]; then
     exit -1
 fi
 
-echo "==============================================="
-echo "             Atl installer"
-echo "==============================================="
-echo
+signature(){
+cat << "EOF"
+        installer process for  
 
-CONFIGURE="NO"
-NOSUMAN="NO"
-PREFIX="NO"
+        █████╗ ████████╗██╗     
+        ██╔══██╗╚══██╔══╝██║     
+        ███████║   ██║   ██║     
+        ██╔══██║   ██║   ██║     
+        ██║  ██║   ██║   ███████╗
+        ╚═╝  ╚═╝   ╚═╝   ╚══════╝
+EOF
+}
+
+CONFIGURE=0
+PREFIX=0
 FOLDER=""
-
+COUNT=0
 
 # ARGS parser
 for i in "$@"; do
-  case $i in
-    -c|--configure)
-        CONFIGURE="YES"
-        shift 
-        ;;
-    -p=*|--prefix=*)
-        PREFIX="YES"
-        FOLDER="${i#*=}"
-        if [[ ! -d $FOLDER ]]
-        then
-            echo "[ERR] => given path -> $FOLDER does not exits, quitting.."
-            exit -1
-        fi
-        shift 
-        ;;
-    -h|--help)
-        echo "install [options]"
-        echo
-        echo "  -c|--configure"
-        echo "      initializes the configuration process"
-        echo
-        echo "  -p|--prefix=<path>"
-        echo "      specifies the installation path" 
-        echo
-        echo "  -h|--help"
-        echo "      run helper"
-        echo
-        exit 0
-        shift 
-        ;;
-    -*|--*)
-        echo "Unknown option $i"
-        echo "Please run ./install --help"
-        exit 1
-        ;;
-    *)
-        ;;
-  esac
+    COUNT=$((COUNT+1))
+    case $i in
+        -c|--configure)
+            CONFIGURE=1
+            shift 
+            ;;
+        -p=*|--prefix=*)
+            PREFIX=1
+            FOLDER="${i#*=}"
+            if [[ ! -d $FOLDER ]]
+            then
+                echo "[ERR] => given path -> $FOLDER does not exits\nquitting.."
+                exit -1
+            fi
+            shift 
+            ;;
+        -h|--help)
+            echo "install [options]"
+            echo
+            echo "  -c|--configure"
+            echo "      initializes the configuration process"
+            echo
+            echo "  -p|--prefix=<path>"
+            echo "      specifies the installation path" 
+            echo
+            echo "  -h|--help"
+            echo "      run helper"
+            echo
+            exit 0
+            shift 
+            ;;
+        -*|--*)
+            echo "Unknown option $i"
+            echo "Please run ./install --help"
+            exit 1
+            ;;
+        *)
+            ;;
+    esac
 done
 # ARGS parser end
+
+if [ $COUNT -eq 0 ]; then
+    echo "[ERR] => No args detected, use --help for tips"
+    exit -1
+fi
+
+if [ $PREFIX -eq 0 ]; then
+    echo "[ERR] => No given path, quitting.."
+    exit -1
+fi
+
+signature
 
 # DIR selector
 i=$(whoami)
@@ -80,8 +100,6 @@ fi
 
 if [ $response == "y" ] || [ $response == "Y" ]; then
     FOLDER=$FIND
-elif [ $PREFIX == "NO" ]; then
-    FOLDER="/usr/local/bin"
 else
     if [ $response != "y" ] || [ $response != "Y" ]; then
         if ! rm -rf $FIND; then
@@ -89,7 +107,7 @@ else
             exit -1
         fi
     fi
-    FOLDER="${FOLDER}/atl"
+    FOLDER="${FOLDER}/Atl"
     if [[ ! -d "${FOLDER}" ]]
     then
         if ! mkdir "${FOLDER}"; then
@@ -105,126 +123,109 @@ fi
 # DIR selector end
 
 # Installer
-if ! $(touch "${FOLDER}test" 2> /dev/null ); then
-    # sudo part
-    
-    echo "Copying the executable into ${FOLDER}.."
-    echo "Need sudo privileges to copy the executable.." 
-    if ! sudo cp atl $FOLDER; then
-        echo "An error occurred while copying executable, exiting"
+
+echo "Copying the executable into ${FOLDER}"
+
+# DIRS & FILES checking/copying
+if [[ ! -d "${FOLDER}bin" ]]
+then
+    if ! mkdir "${FOLDER}/bin"; then
+        echo "An error occurred, exiting"
         exit -1
+    fi
+fi
+
+if [[ ! -d "${FOLDER}man" ]]
+then
+    if ! mkdir "${FOLDER}/man"; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+fi
+
+if [[ ! -d "${FOLDER}man/man1" ]]
+then
+    if ! mkdir "${FOLDER}/man/man1"; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+fi
+
+if [[ ! -d "/home/$i/.atl" ]]
+then
+    if ! mkdir /home/$i/.atl; then
+        echo "An error occurred, exiting"
+        exit -1
+    else
+        echo "Created /home/$i/.atl conf folder.."
+    fi
+fi
+
+if [[ ! -f "/home/$i/.atl/cache" ]]
+then
+    if ! touch /home/$i/.atl/cache; then
+        echo "An error occurred, exiting"
+        exit -1
+    else
+        echo "Created /home/$i/.atl/cache file.."
+    fi
+fi
+
+if ! echo "${FOLDER}" > /home/$i/.atl/cache ; then
+    echo "An error occurred, exiting"
+    exit -1
+fi
+
+if ! cp atl "${FOLDER}bin"; then
+    echo "An error occurred while copying executable, exiting"
+    exit -1
+fi
+
+if ! cp config "${FOLDER}bin"; then
+    echo "An error occurred while copying config, exiting"
+    exit -1
+fi
+# DIRS & FILES checking/copying end
+
+# MAN 
+{
+    if ! rm -f ${FOLDER}man/man1/atl.1.gz; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! cp atl.1 ${FOLDER}man/man1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! gzip ${FOLDER}man/man1/atl.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! rm -f ${FOLDER}man/man1/atl.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+} &> /dev/null
+# MAN end
+
+# atl SOFT LINK to /usr/local/bin
+echo "done"
+echo
+echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
+read response 
+
+if [ $response == "Y" ] || [ $response == "y" ]; then
+    if ! sudo ln -sf "${FOLDER}bin/atl" /usr/local/bin/atl; then
+        echo "An error occurred while creating symbolic link, exiting"
+        exit -1
+    else 
+        echo "Soft link created"
     fi
 else
-    # no sudo part
-    echo "Copying the executable into ${FOLDER}"
-
-    # rm previous created file 
-    if ! rm -f "${FOLDER}test"; then
-        echo "An error occurred, exiting"
-        exit -1
-    fi
-
-    # DIRS & FILES checking/copying
-    if [[ ! -d "${FOLDER}bin" ]]
-    then
-        if ! mkdir "${FOLDER}/bin"; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-    fi
-
-    if [[ ! -d "${FOLDER}man" ]]
-    then
-        if ! mkdir "${FOLDER}/man"; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-    fi
-
-    if [[ ! -d "${FOLDER}man/man1" ]]
-    then
-        if ! mkdir "${FOLDER}/man/man1"; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-    fi
-
-    if [[ ! -d "/home/$i/.atl" ]]
-    then
-        if ! mkdir /home/$i/.atl; then
-            echo "An error occurred, exiting"
-            exit -1
-        else
-            echo "Created /home/$i/.atl conf folder.."
-        fi
-    fi
-
-    if [[ ! -f "/home/$i/.atl/cache" ]]
-    then
-        if ! touch /home/$i/.atl/cache; then
-            echo "An error occurred, exiting"
-            exit -1
-        else
-            echo "Created /home/$i/.atl/cache file.."
-        fi
-    fi
-
-    if ! echo "${FOLDER}" > /home/$i/.atl/cache ; then
-        echo "An error occurred, exiting"
-        exit -1
-    fi
-
-    if ! cp atl "${FOLDER}bin"; then
-        echo "An error occurred while copying executable, exiting"
-        exit -1
-    fi
-
-    if ! cp config "${FOLDER}bin"; then
-        echo "An error occurred while copying config, exiting"
-        exit -1
-    fi
-    # DIRS & FILES checking/copying end
-
-    # MAN 
-    {
-        NOSUMAN="YES"
-        if ! rm -f ${FOLDER}man/man1/atl.1.gz; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-        if ! cp atl.1 ${FOLDER}man/man1; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-        if ! gzip ${FOLDER}man/man1/atl.1; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-        if ! rm -f ${FOLDER}man/man1/atl.1; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
-    } &> /dev/null
-    # MAN end
-
-    # atl SOFT LINK to /usr/local/bin
-    echo "done"
-    echo
-    echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
-    read response 
-
-    if [ $response == "Y" ] || [ $response == "y" ]; then
-        if ! sudo ln -sf "${FOLDER}bin/atl" /usr/local/bin/atl; then
-            echo "An error occurred while creating symbolic link, exiting"
-            exit -1
-        else 
-            echo "Soft link created"
-        fi
-    else
-        echo "Generating new soft link aborted."
-    fi
-    # atl SOFT LINK to /usr/local/bin end
+    echo "Generating new soft link aborted."
 fi
+# atl SOFT LINK to /usr/local/bin end
+
 
 # man generation
 echo
@@ -242,39 +243,13 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
         fi
     fi
 
-    if [ $NOSUMAN == "YES" ]; then
-        # man SOFT LINK ( no sudo )
-        {
-            if ! sudo ln -sf "${FOLDER}man/man1/atl.1.gz" /usr/share/man/man1/atl.1.gz; then
-                echo "An error occurred while generating entry for man, exiting"
-                exit -1
-            fi
-        } &> /dev/null
-    else
-        # man cp and gz it( sudo )
-        {
-            if ! sudo rm -f /usr/share/man/man1/atl.1; then
-                echo "An error occurred while removing atl cache for man, exiting"
-                exit -1
-            fi
-            if ! sudo rm -f /usr/share/man/man1/atl.1.gz; then
-                echo "An error occurred while removing atl cache for man, exiting"
-                exit -1
-            fi
-            if ! sudo cp atl.1 /usr/share/man/man1; then
-                echo "An error occurred while generating entry for man, exiting"
-                exit -1
-            fi
-            if ! sudo gzip /usr/share/man/man1/atl.1; then
-                echo "An error occurred while generating entry for man, exiting"
-                exit -1
-            fi
-            if ! sudo rm -f /usr/share/man/man1/atl.1; then
-                echo "An error occurred while removing atl cache for man, exiting"
-                exit -1
-            fi
-        } &> /dev/null
-    fi
+    # man SOFT LINK ( no sudo )
+    {
+        if ! sudo ln -sf "${FOLDER}man/man1/atl.1.gz" /usr/share/man/man1/atl.1.gz; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+    } &> /dev/null
     
 
     echo
@@ -295,7 +270,7 @@ fi
 echo "done"
 echo 
 
-if [ $CONFIGURE == "YES" ]; then
+if [ $CONFIGURE -eq 1 ]; then
     echo
     exec ./config --deps
 fi

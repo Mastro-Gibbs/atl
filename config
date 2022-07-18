@@ -12,16 +12,14 @@ COUNT=0
 
 signature(){
 cat << "EOF"
-           configure process for          
-                _                  _  _   
-               | |                (_)| |  
-   __ _  _   _ | |_   ___    __ _  _ | |_ 
-  / _` || | | || __| / _ \  / _` || || __|
- | (_| || |_| || |_ | (_) || (_| || || |_ 
-  \__,_| \__,_| \__| \___/  \__, ||_| \__|
-                             __/ |        
-                            |___/   
-            
+        configure process for  
+
+        █████╗ ████████╗██╗     
+        ██╔══██╗╚══██╔══╝██║     
+        ███████║   ██║   ██║     
+        ██╔══██║   ██║   ██║     
+        ██║  ██║   ██║   ███████╗
+        ╚═╝  ╚═╝   ╚═╝   ╚══════╝
 EOF
 }
 
@@ -77,9 +75,6 @@ done
 if [ $COUNT -eq 0 ]; then
     echo "[ERR] => No args detected, use --help for tips"
     exit -1
-elif [ $COUNT -gt 0 ]; then 
-    signature
-fi
 # ARGS check end
 
 i=$(who | awk '{print $1}' | head -n 1)
@@ -273,12 +268,14 @@ dependencies(){
 }
 
 if [ $GITDATA -eq 1 ]; then
+    signature
     git_data
     echo "done"
 
 fi
 
 if [ $SSHDATA -eq 1 ]; then
+    signature
     ssh_data
     echo "done"
 
