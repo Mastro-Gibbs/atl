@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.1
+# version BETA 0.1.2
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"
@@ -11,7 +11,7 @@ if [ $(whoami) == "root" ]; then
 fi
 
 echo "==============================================="
-echo "             Autogit installer"
+echo "             Atl installer"
 echo "==============================================="
 echo
 
@@ -68,9 +68,9 @@ done
 i=$(whoami)
 response="n"
 
-if [[ -f "/home/$i/.autogit/cache" ]]
+if [[ -f "/home/$i/.atl/cache" ]]
 then
-    FIND=$(head -n1 /home/$i/.autogit/cache)
+    FIND=$(head -n1 /home/$i/.atl/cache)
     if [[ $FIND != "" ]]
     then
         echo "A previous installation folder was found in $FIND, do you like override it? [y/n]"
@@ -89,7 +89,7 @@ else
             exit -1
         fi
     fi
-    FOLDER="${FOLDER}/Autogit"
+    FOLDER="${FOLDER}/atl"
     if [[ ! -d "${FOLDER}" ]]
     then
         if ! mkdir "${FOLDER}"; then
@@ -110,7 +110,7 @@ if ! $(touch "${FOLDER}test" 2> /dev/null ); then
     
     echo "Copying the executable into ${FOLDER}.."
     echo "Need sudo privileges to copy the executable.." 
-    if ! sudo cp autogit $FOLDER; then
+    if ! sudo cp atl $FOLDER; then
         echo "An error occurred while copying executable, exiting"
         exit -1
     fi
@@ -149,33 +149,38 @@ else
         fi
     fi
 
-    if [[ ! -d "/home/$i/.autogit" ]]
+    if [[ ! -d "/home/$i/.atl" ]]
     then
-        if ! mkdir /home/$i/.autogit; then
+        if ! mkdir /home/$i/.atl; then
             echo "An error occurred, exiting"
             exit -1
         else
-            echo "Created /home/$i/.autogit conf folder.."
+            echo "Created /home/$i/.atl conf folder.."
         fi
     fi
 
-    if [[ ! -f "/home/$i/.autogit/cache" ]]
+    if [[ ! -f "/home/$i/.atl/cache" ]]
     then
-        if ! touch /home/$i/.autogit/cache; then
+        if ! touch /home/$i/.atl/cache; then
             echo "An error occurred, exiting"
             exit -1
         else
-            echo "Created /home/$i/.autogit/cache file.."
+            echo "Created /home/$i/.atl/cache file.."
         fi
     fi
 
-    if ! echo "${FOLDER}" > /home/$i/.autogit/cache ; then
+    if ! echo "${FOLDER}" > /home/$i/.atl/cache ; then
         echo "An error occurred, exiting"
         exit -1
     fi
 
-    if ! cp autogit "${FOLDER}bin"; then
+    if ! cp atl "${FOLDER}bin"; then
         echo "An error occurred while copying executable, exiting"
+        exit -1
+    fi
+
+    if ! cp config "${FOLDER}bin"; then
+        echo "An error occurred while copying config, exiting"
         exit -1
     fi
     # DIRS & FILES checking/copying end
@@ -183,33 +188,33 @@ else
     # MAN 
     {
         NOSUMAN="YES"
-        if ! rm -f ${FOLDER}man/man1/autogit.1.gz; then
+        if ! rm -f ${FOLDER}man/man1/atl.1.gz; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! cp autogit.1 ${FOLDER}man/man1; then
+        if ! cp atl.1 ${FOLDER}man/man1; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! gzip ${FOLDER}man/man1/autogit.1; then
+        if ! gzip ${FOLDER}man/man1/atl.1; then
             echo "An error occurred, exiting"
             exit -1
         fi
-        if ! rm -f ${FOLDER}man/man1/autogit.1; then
+        if ! rm -f ${FOLDER}man/man1/atl.1; then
             echo "An error occurred, exiting"
             exit -1
         fi
     } &> /dev/null
     # MAN end
 
-    # autogit SOFT LINK to /usr/local/bin
+    # atl SOFT LINK to /usr/local/bin
     echo "done"
     echo
     echo "Do you want to generate a soft link to /usr/local/bin? needs sudo permissions [y/n]"
     read response 
 
     if [ $response == "Y" ] || [ $response == "y" ]; then
-        if ! sudo ln -sf "${FOLDER}bin/autogit" /usr/local/bin/autogit; then
+        if ! sudo ln -sf "${FOLDER}bin/atl" /usr/local/bin/atl; then
             echo "An error occurred while creating symbolic link, exiting"
             exit -1
         else 
@@ -218,7 +223,7 @@ else
     else
         echo "Generating new soft link aborted."
     fi
-    # autogit SOFT LINK to /usr/local/bin end
+    # atl SOFT LINK to /usr/local/bin end
 fi
 
 # man generation
@@ -240,7 +245,7 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
     if [ $NOSUMAN == "YES" ]; then
         # man SOFT LINK ( no sudo )
         {
-            if ! sudo ln -sf "${FOLDER}man/man1/autogit.1.gz" /usr/share/man/man1/autogit.1.gz; then
+            if ! sudo ln -sf "${FOLDER}man/man1/atl.1.gz" /usr/share/man/man1/atl.1.gz; then
                 echo "An error occurred while generating entry for man, exiting"
                 exit -1
             fi
@@ -248,24 +253,24 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
     else
         # man cp and gz it( sudo )
         {
-            if ! sudo rm -f /usr/share/man/man1/autogit.1; then
-                echo "An error occurred while removing autogit cache for man, exiting"
+            if ! sudo rm -f /usr/share/man/man1/atl.1; then
+                echo "An error occurred while removing atl cache for man, exiting"
                 exit -1
             fi
-            if ! sudo rm -f /usr/share/man/man1/autogit.1.gz; then
-                echo "An error occurred while removing autogit cache for man, exiting"
+            if ! sudo rm -f /usr/share/man/man1/atl.1.gz; then
+                echo "An error occurred while removing atl cache for man, exiting"
                 exit -1
             fi
-            if ! sudo cp autogit.1 /usr/share/man/man1; then
+            if ! sudo cp atl.1 /usr/share/man/man1; then
                 echo "An error occurred while generating entry for man, exiting"
                 exit -1
             fi
-            if ! sudo gzip /usr/share/man/man1/autogit.1; then
+            if ! sudo gzip /usr/share/man/man1/atl.1; then
                 echo "An error occurred while generating entry for man, exiting"
                 exit -1
             fi
-            if ! sudo rm -f /usr/share/man/man1/autogit.1; then
-                echo "An error occurred while removing autogit cache for man, exiting"
+            if ! sudo rm -f /usr/share/man/man1/atl.1; then
+                echo "An error occurred while removing atl cache for man, exiting"
                 exit -1
             fi
         } &> /dev/null
@@ -292,6 +297,6 @@ echo
 
 if [ $CONFIGURE == "YES" ]; then
     echo
-    exec ./config --initall
+    exec ./config --deps
 fi
 

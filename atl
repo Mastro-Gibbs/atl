@@ -3,14 +3,14 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.1
+# version BETA 0.1.2
 
 set user [exec whoami]
-set gitss /home/$user/.autogit/git/ss
-set gitpw /home/$user/.autogit/git/conf/encr
-set manpage /usr/share/man/man1/autogit.1.gz
-set confdir /home/$user/.autogit
-set executable /usr/local/bin/autogit
+set gitss /home/$user/.atl/git/ss
+set gitpw /home/$user/.atl/git/conf/encr
+set manpage /usr/share/man/man1/atl.1.gz
+set confdir /home/$user/.atl
+set executable /usr/local/bin/atl
 
 set COMMAND 0
 set command 0
@@ -49,24 +49,26 @@ proc version {} {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.1.1 \[BETA\]"
+    puts "  0.1.2 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
     exit 0
 }
 
-proc uninstall {opt} {
+proc uninstall {command opt} {
     set action 0
+    set user [exec whoami]
+    set confdir /home/$user/.atl
 
     puts "==============================================="
-    puts "             Autogit unistaller"
+    puts "             Atl unistaller"
     puts "==============================================="
     puts ""
 
     if {[file exists $confdir]} {
         puts "Removing installation folder"
-        set ifol [exec head -n1 /home/$i/.autogit/cache]
+        set ifol [exec head -n1 /home/$user/.atl/cache]
 
         if { $ifol != "" } {
             exec sudo rm -fr $ifol
@@ -80,13 +82,13 @@ proc uninstall {opt} {
         set action 1
     }
 
-    puts "Unistalling autogit.."
+    puts "Unistalling atl.."
 
     puts "Removing executable if exists"
-    exec sudo rm -f /usr/local/bin/autogit
+    exec sudo rm -f /usr/local/bin/atl
 
     puts "Removing entry for man-db if exists"
-    exec sudo rm -f /usr/share/man/man1/autogit.1.gz
+    exec sudo rm -f /usr/share/man/man1/atl.1.gz
 
     puts "Elaborating trigger for man-db"
     spawn -noecho sudo mandb
@@ -98,6 +100,50 @@ proc uninstall {opt} {
     }
 
     exit 0
+}
+
+proc config {opt} {
+    set err_msg "\[ERR\] => configuration not found\nquitting.."
+    set arg 0
+    set user [exec whoami]
+    set confdir /home/$user/.atl
+
+    switch -regexp -- $opt {
+        {(^git$)} {
+            set arg "--github"
+        }
+        
+        {(^ssh$)} {
+            set arg "--ssh"
+        }
+
+        default {
+            # dummy 
+            exit -1
+        }
+    }
+
+    if {[file exists $confdir]} {
+        set ifol [exec head -n1 /home/$user/.atl/cache]
+
+        if { $ifol != "" } {
+            set ifol ${ifol}bin/config
+            if {[file exists $ifol]} {
+                spawn -noecho $ifol $arg
+                interact
+                exit 0
+            } else {
+                puts "\[ERR\] => no script found\nquitting.."
+                exit -1
+            }
+        } else {
+            puts $err_msg
+            exit -1
+        }
+    } else {
+        puts $err_msg
+        exit -1
+    }
 }
 
 proc parseargs {argc argv} {
@@ -120,15 +166,36 @@ proc parseargs {argc argv} {
                 if { $tmp == "--purge" } {
                     set opt [lindex $argv 1]
                 } else {
-                    puts "\[ERR\] => unknown option '$tmp'\nrun autogit --help\nquitting.."
+                    puts "\[ERR\] => unknown option '$tmp'\nrun atl --help\nquitting.."
                     exit -1
                 }
             }
-            uninstall $opt
+            uninstall $COMMAND $opt
+        }
+
+        {(^config$)} {
+            set opt 0
+
+            if { $argc < 2 } { puts "\[ERR\] => must specify configure option\nquitting.."; exit -1 }
+
+            set tmp [lindex $argv 1]
+
+            switch -regexp -- $tmp {
+                {(^git$|^ssh$)} {
+                    set opt $tmp
+                }
+
+                default {
+                    puts "Unknown option '$tmp'\nquitting.."
+                    exit -1
+                }
+            }
+
+            config $opt
         }
 
         default {
-            puts "\[ERR\] => command '$COMMAND' not valid, quitting"
+            puts "\[ERR\] => command '$COMMAND' not valid\nquitting"
             exit -1
         }
     }
@@ -138,7 +205,7 @@ proc parseargs {argc argv} {
     for { set iter 1 } { $iter < $argc } { incr iter } {
         set curr [lindex $argv $iter]
 
-        set err_msg "\[ERR\] => cannot use command/option '$curr' here\nrun autogit --help\nquitting.."
+        set err_msg "\[ERR\] => cannot use command/option '$curr' here\nrun atl --help\nquitting.."
 
         switch -regexp -- $curr {
             {(^git$|^ssh$|^uninstall$)} { puts $err_msg; exit -1 }

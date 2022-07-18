@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.1
+# version BETA 0.1.2
 
 DEPENDECIES=0
 GITDATA=0
@@ -83,7 +83,7 @@ fi
 # ARGS check end
 
 i=$(who | awk '{print $1}' | head -n 1)
-basedir="/home/$i/.autogit"
+basedir="/home/$i/.atl"
 
 
 # DIRS & FILES checking/gen
@@ -120,7 +120,13 @@ git_data(){
     echo "==============================================="
     echo    
 
-    if [[ ! -d "${basedir}/conf" ]]
+    echo "> Set username: "
+    read uname
+
+    echo "> Set password/token: (silent)"
+    read -s passwd
+
+    if [[ ! -d "${basedir}/git/conf" ]]
     then
         echo "Created ${basedir}/git/conf folder.."
         mkdir ${basedir}/git/conf
@@ -145,12 +151,6 @@ git_data(){
     head -c 256 /dev/random | base64 > ${basedir}/git/conf/encr  # gen rand pass
     chmod 0400 ${basedir}/git/conf/encr                          # set minimal privs
 
-    echo "> Set username: "
-    read uname
-
-    echo "> Set password/token: (silent)"
-    read -s passwd
-
     echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/git/conf/encr > ${basedir}/git/ss
     echo "-?-" >> ${basedir}/git/ss
     echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/git/conf/encr >> ${basedir}/git/ss
@@ -169,7 +169,7 @@ ssh_data(){
     read uname
 
     echo "> Set host:"
-    read -s host
+    read host
 
     echo "> Set password: (silent)"
     read -s passwd
@@ -178,22 +178,16 @@ ssh_data(){
     then
         echo "Created ${basedir}/ssh/${uname}@${host} folder.."
         mkdir ${basedir}/ssh/${uname}@${host}
+    else
+        echo "Regenerated ${basedir}/ssh/${uname}@${host} folder.."
+        rm -rf ${basedir}/ssh/${uname}@${host}
+        mkdir ${basedir}/ssh/${uname}@${host}
     fi
 
     if [[ ! -d "${basedir}/ssh/${uname}@${host}/conf" ]]
     then
         echo "Created ${basedir}/ssh/${uname}@${host}/conf folder.."
         mkdir ${basedir}/ssh/${uname}@${host}/conf
-    fi
-
-    if [[ -f "${basedir}/ssh/${uname}@${host}/conf/encr" ]]
-    then
-        rm -f ${basedir}/ssh/${uname}@${host}/conf/encr
-    fi
-
-    if [[ -f "${basedir}/ssh/${uname}@${host}/ss" ]]
-    then
-        rm -f ${basedir}/ssh/${uname}@${host}/ss
     fi
 
     echo "Created ${basedir}/ssh/${uname}@${host}/conf/encr file.."
@@ -228,6 +222,9 @@ dependencies(){
     fi
     if ! type "git" &> /dev/null; then
         REQUIRED_PKG+=("git")
+    fi
+    if ! type "ssh" &> /dev/null; then
+        REQUIRED_PKG+=("openssh-client")
     fi
 
     if [ ${#REQUIRED_PKG[@]} -eq 0 ]; then
