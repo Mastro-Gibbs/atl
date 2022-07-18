@@ -171,13 +171,20 @@ proc parseargs {argc argv} {
         }
     }
 
-    set other_args [lrange $argv 2 end]
-    set result "$COMMAND $command \"$other_args\""
+    set result "$COMMAND $command"
     return $result
 }
 
-lassign [parseargs $argc $argv] COMMAND command arguments
+# ARGS parsing area
+lassign [parseargs $argc $argv] COMMAND command
 
+if { $argc > 2 } {
+    set arguments [lrange $argv 2 end]
+}
+# ARGS parsing area END
+
+
+# CORE impl
 switch -regexp -- $COMMAND {
     {(^git$)} {
         set USERNAME [exec -- sh -c "tail -f $supersecrets | sed \"/^-?-$/ q\" | head -n -1 | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$conffolder/conf/encr"]
@@ -254,6 +261,6 @@ switch -regexp -- $COMMAND {
     } 
 
 }
-
+# CORE impl END
 
 
