@@ -102,10 +102,10 @@ proc uninstall {opt} {
 proc parseargs {argc argv} {
     if { $argc == 0 } { help }
 
-    set command [lindex $argv 0]
+    set COMMAND [lindex $argv 0]
     set command 0
 
-    switch -regexp -- $command {
+    switch -regexp -- $COMMAND {
         {(^git$|^ssh$)} {}
 
         {(^\-h$|^\-\-help$)} { help }
@@ -127,7 +127,7 @@ proc parseargs {argc argv} {
         }
 
         default {
-            puts "\[ERR\] => command '$command' not valid, quitting"
+            puts "\[ERR\] => command '$COMMAND' not valid, quitting"
             exit -1
         }
     }
@@ -147,7 +147,7 @@ proc parseargs {argc argv} {
             {(^\-v$|^\-\-version$)} { version }
 
             default { 
-                if { $command == "git" } {
+                if { $COMMAND == "git" } {
                     switch -regexp -- $curr {
                         {(^saio$)} {
                             if { $iter != 1 } { puts $err_msg; exit -1 }
@@ -155,12 +155,16 @@ proc parseargs {argc argv} {
                             set command $curr
                         }
 
-                        default {}
+                        default {
+                            set command $curr
+                        }
                     }
 
-                } elseif { $command == "ssh" } {
+                } elseif { $COMMAND == "ssh" } {
                     switch -regexp -- $curr {
-                        default {}
+                        default {
+                            set command $curr
+                        }
                     }
                 }
             }
@@ -168,7 +172,7 @@ proc parseargs {argc argv} {
     }
 
     set other_args [lrange $argv 2 end]
-    set result "$command $command \"$other_args\""
+    set result "$COMMAND $command \"$other_args\""
     return $result
 }
 
