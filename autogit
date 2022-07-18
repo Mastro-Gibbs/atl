@@ -156,14 +156,14 @@ proc parseargs {argc argv} {
                         }
 
                         default {
-                            set command $curr
+                            if { $iter == 1 } { set command $curr }
                         }
                     }
 
                 } elseif { $COMMAND == "ssh" } {
                     switch -regexp -- $curr {
                         default {
-                            set command $curr
+                            if { $iter == 1 } { set command $curr }
                         }
                     }
                 }
