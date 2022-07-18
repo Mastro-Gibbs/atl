@@ -190,14 +190,14 @@ switch -regexp -- $COMMAND {
             
                 spawn -noecho git push
                 expect {
-                    timeout { puts "No auth required"; puts "done"; exit 1 }
+                    timeout { puts "Timeout reached, quitting.."; exit -1 }
                     eof { puts "No auth required"; puts "done"; exit 1 }
                     "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
                     "Username for 'https://github.com':"
                 }
                 send "$USERNAME\r"
                 expect {
-                    timeout { puts "No auth required"; puts "done"; exit 1 }
+                    timeout { puts "Timeout reached, quitting.."; exit -1 }
                     eof { puts "No auth required"; puts "done"; exit 1 }
                     "Password for 'https://$USERNAME@github.com':"
                 }
@@ -217,15 +217,15 @@ switch -regexp -- $COMMAND {
 
                 spawn -noecho git $command {*}$arguments
                 expect {
-                    timeout { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
-                    eof { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
+                    timeout { puts "Timeout reached, quitting.."; exit -1 }
+                    eof { puts "No auth required"; exit 1 }
                     "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
                     "Username for 'https://github.com':"
                 }
                 send "$USERNAME\r"
                 expect {
-                    timeout { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
-                    eof { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
+                    timeout { puts "Timeout reached, quitting.."; exit -1 }
+                    eof { puts "No auth required"; exit 1 }
                     "Password for 'https://$USERNAME@github.com':"
                 }
                 send "$TOKEN\r"
