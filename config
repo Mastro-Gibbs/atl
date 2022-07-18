@@ -3,62 +3,12 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4.3
+# version BETA 0.1.1
 
-FULL="NO"
-DEPENDECIES="NO"
-USERDATA="NO"
-HELP="NO"
+DEPENDECIES=0
+GITDATA=0
+SSHDATA=0
 COUNT=0
-
-# ARGS parser
-for i in "$@"; do
-  COUNT=$((COUNT+1))
-  case $i in
-    -i|--initall)
-      FULL="YES"
-      USERDATA="NO"
-      DEPENDECIES="NO"
-      shift 
-      ;;
-    -d|--deps)
-      if [ $FULL == "YES" ]; then
-        echo "[ERR] => cannot combine -i|--initall with $i"
-        exit -1
-      fi
-      DEPENDECIES="YES"
-      shift 
-      ;;
-    -u=*|--userdata=*)
-        TYPE="${i#*=}"
-
-        if [ $TYPE != "git" ] && [ $TYPE != "ssh" ]; then
-            echo "Unknown option $TYPE"
-            echo "Please run ./config --help"
-            exit 1
-        fi 
-
-        if [ $FULL == "YES" ]; then
-            echo "[ERR] => cannot combine -i|--initall with $i"
-            exit -1
-        fi
-        USERDATA="YES"
-        shift 
-        ;;
-    -h|--help)
-      HELP="YES"
-      shift 
-      ;;
-    -*|--*)
-      echo "Unknown option $i"
-      echo "Please run ./config --help"
-      exit 1
-      ;;
-    *)
-      ;;
-  esac
-done
-# ARGS parser end
 
 signature(){
 cat << "EOF"
@@ -75,22 +25,53 @@ cat << "EOF"
 EOF
 }
 
-if [ $HELP == "YES" ]; then
+helper(){
     echo "config [options]"
-    echo "  -i|--initall"
-    echo "      set username and password, check for dep and install them"
+    echo "  -g|--github"
+    echo "      set username and password"
     echo
-    echo "  -u|--userdata"
+    echo "  -s|--ssh"
     echo "      set username and password"
     echo
     echo "  -d|--deps"
     echo "      check for dep and install them"
     echo
     echo "  -h|--help"
-    echo "      check for dep and install them"
+    echo "      print user friendly helper"
     echo
     exit 0
-fi
+}
+
+# ARGS parser
+for i in "$@"; do
+  COUNT=$((COUNT+1))
+  case $i in
+    -d|--deps)
+        DEPENDECIES=1
+        shift 
+        ;;
+    -g|--github)
+        GITDATA=1
+        shift 
+        ;;
+    -s|--ssh)
+        SSHDATA=1
+        shift 
+        ;;
+    -h|--help)
+        helper
+        shift 
+        ;;
+    -*|--*)
+        echo "Unknown option $i"
+        echo "Please run ./config --help"
+        exit 1
+        ;;
+    *)
+        ;;
+  esac
+done
+# ARGS parser end
 
 # ARGS check
 if [ $COUNT -eq 0 ]; then
@@ -112,59 +93,122 @@ then
     mkdir ${basedir}
 fi
 
+if [[ ! -d $basedir/git ]]
+then
+    echo "Created ${basedir}/git folder.."
+    mkdir ${basedir}/git
+fi
+
+if [[ ! -d $basedir/ssh ]]
+then
+    echo "Created ${basedir}/ssh folder.."
+    mkdir ${basedir}/ssh
+fi
+
 if [[ ! -f "${basedir}/cache" ]]
 then
     echo "Created ${basedir}/cache file.."
     touch ${basedir}/cache
 fi
-
-if [[ ! -d "${basedir}/conf" ]]
-then
-    echo "Created ${basedir}/conf folder.."
-    mkdir ${basedir}/conf
-fi
 # DIRS & FILES checking/gen end
 
 
-user_data(){
+git_data(){
     echo
     echo "==============================================="
     echo "          Set up your git credentials"
     echo "==============================================="
     echo    
 
-    if [[ -f "${basedir}/conf/encr" ]]
+    if [[ ! -d "${basedir}/conf" ]]
     then
-        rm -f ${basedir}/conf/encr
+        echo "Created ${basedir}/git/conf folder.."
+        mkdir ${basedir}/git/conf
     fi
 
-    if [[ -f "${basedir}/supersecrets" ]]
+    if [[ -f "${basedir}/git/conf/encr" ]]
     then
-        rm -f ${basedir}/supersecrets
+        rm -f ${basedir}/git/conf/encr
     fi
 
-    echo "Created ${basedir}/conf file.."
-    touch ${basedir}/conf/encr
+    if [[ -f "${basedir}/git/ss" ]]
+    then
+        rm -f ${basedir}/git/ss
+    fi
 
-    echo "Created ${basedir}/supersecrets file.."
-    touch ${basedir}/supersecrets
+    echo "Created ${basedir}/git/conf file.."
+    touch ${basedir}/git/conf/encr
 
-    head -c 256 /dev/random | base64 > ${basedir}/conf/encr  # gen rand pass
-    chmod 0400 ${basedir}/conf/encr                          # set minimal privs
+    echo "Created ${basedir}/ss file.."
+    touch ${basedir}/git/ss
+
+    head -c 256 /dev/random | base64 > ${basedir}/git/conf/encr  # gen rand pass
+    chmod 0400 ${basedir}/git/conf/encr                          # set minimal privs
 
     echo "> Set username: "
     read uname
 
-    echo "> Set password/token: (no-echo)"
+    echo "> Set password/token: (silent)"
     read -s passwd
 
-    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr > ${basedir}/supersecrets
-    echo "-?-" >> ${basedir}/supersecrets
-    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/conf/encr >> ${basedir}/supersecrets
+    echo $uname | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/git/conf/encr > ${basedir}/git/ss
+    echo "-?-" >> ${basedir}/git/ss
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/git/conf/encr >> ${basedir}/git/ss
 
-    chmod 0400 ${basedir}/supersecrets                       # set minimal privs
+    chmod 0400 ${basedir}/git/ss                                # set minimal privs
 }
 
+ssh_data(){
+    echo
+    echo "==============================================="
+    echo "          Set up your ssh credentials"
+    echo "==============================================="
+    echo    
+
+    echo "> Set username: "
+    read uname
+
+    echo "> Set host:"
+    read -s host
+
+    echo "> Set password: (silent)"
+    read -s passwd
+
+    if [[ ! -d "${basedir}/ssh/${uname}@${host}" ]]
+    then
+        echo "Created ${basedir}/ssh/${uname}@${host} folder.."
+        mkdir ${basedir}/ssh/${uname}@${host}
+    fi
+
+    if [[ ! -d "${basedir}/ssh/${uname}@${host}/conf" ]]
+    then
+        echo "Created ${basedir}/ssh/${uname}@${host}/conf folder.."
+        mkdir ${basedir}/ssh/${uname}@${host}/conf
+    fi
+
+    if [[ -f "${basedir}/ssh/${uname}@${host}/conf/encr" ]]
+    then
+        rm -f ${basedir}/ssh/${uname}@${host}/conf/encr
+    fi
+
+    if [[ -f "${basedir}/ssh/${uname}@${host}/ss" ]]
+    then
+        rm -f ${basedir}/ssh/${uname}@${host}/ss
+    fi
+
+    echo "Created ${basedir}/ssh/${uname}@${host}/conf/encr file.."
+    touch ${basedir}/ssh/${uname}@${host}/conf/encr
+
+    echo "Created ${basedir}/ssh/${uname}@${host}/ss file.."
+    touch ${basedir}/ssh/${uname}@${host}/ss
+
+    head -c 256 /dev/random | base64 > ${basedir}/ssh/${uname}@${host}/conf/encr  # gen rand pass
+    chmod 0400 ${basedir}/ssh/${uname}@${host}/conf/encr                          # set minimal privs
+
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/ssh/${uname}@${host}/conf/encr > ${basedir}/ssh/${uname}@${host}/ss
+
+    chmod 0400 ${basedir}/ssh/${uname}@${host}/ss                     # set minimal privs
+}
 
 dependencies(){
     echo
@@ -231,24 +275,23 @@ dependencies(){
     fi
 }
 
-if [ $USERDATA == "YES" ]; then
-    user_data
+if [ $GITDATA -eq 1 ]; then
+    git_data
     echo "done"
 
 fi
 
-if [ $DEPENDECIES == "YES" ]; then
+if [ $SSHDATA -eq 1 ]; then
+    ssh_data
+    echo "done"
+
+fi
+
+if [ $DEPENDECIES -eq 1 ]; then
     dependencies
 
     echo "done"
 fi
 
-if [ $FULL == "YES" ]; then
-    user_data
-    
-    dependencies
-
-    echo "done"
-fi
 
 

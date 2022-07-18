@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4.3
+# version BETA 0.1.1
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"

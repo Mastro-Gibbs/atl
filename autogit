@@ -3,20 +3,21 @@
 #
 # author stefano fattore
 #
-# version BETA 0.1.0
+# version BETA 0.1.1
 
 set user [exec whoami]
-set supersecrets /home/$user/.autogit/supersecrets
-set conffolder /home/$user/.autogit
-set executable /usr/local/bin/autogit
+set gitss /home/$user/.autogit/git/ss
+set gitpw /home/$user/.autogit/git/conf/encr
 set manpage /usr/share/man/man1/autogit.1.gz
+set confdir /home/$user/.autogit
+set executable /usr/local/bin/autogit
 
 set COMMAND 0
 set command 0
 set arguments ""
 
-if {![file exists $supersecrets]} {
-    puts "\[ERR\] => configuration not found! please run ./config --help"
+if {![file exists $confdir/cache]} {
+    puts "\[ERR\] => configuration not found\nrun ./config --help"
     exit -1
 }
 
@@ -48,7 +49,7 @@ proc version {} {
     puts "==============================================\033\[00m"
     puts ""
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.1.0 \[BETA\]"
+    puts "  0.1.1 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -63,7 +64,7 @@ proc uninstall {opt} {
     puts "==============================================="
     puts ""
 
-    if {[file exists $conffolder]} {
+    if {[file exists $confdir]} {
         puts "Removing installation folder"
         set ifol [exec head -n1 /home/$i/.autogit/cache]
 
@@ -75,7 +76,7 @@ proc uninstall {opt} {
 
     if { $opt != 0 } {
         puts "Removing conf folder.."
-        exec rm -f -r $conffolder
+        exec rm -f -r $confdir
         set action 1
     }
 
@@ -187,8 +188,13 @@ if { $argc > 2 } {
 # CORE impl
 switch -regexp -- $COMMAND {
     {(^git$)} {
-        set USERNAME [exec -- sh -c "tail -f $supersecrets | sed \"/^-?-$/ q\" | head -n -1 | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$conffolder/conf/encr"]
-        set TOKEN [exec cat $supersecrets | sed -n -e "/-?-/,\$p" | sed "1d" | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$conffolder/conf/encr]
+        if {![file exists $gitss] && ![file exists $gitpw]} {
+            puts "\[ERR\] => git configuration not found\nrun ./config --help"
+            exit -1
+        }
+
+        set USERNAME [exec -- sh -c "tail -f $gitss | sed \"/^-?-$/ q\" | head -n -1 | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$gitpw"]
+        set TOKEN [exec cat $gitss | sed -n -e "/-?-/,\$p" | sed "1d" | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$gitpw]
 
         switch -regexp -- $command {
             {(^saio$)} {
