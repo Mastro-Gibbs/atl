@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.4.3
+# version BETA 0.1.0
 
 set user [exec whoami]
 set supersecrets /home/$user/.autogit/supersecrets
@@ -20,9 +20,9 @@ if {![file exists $supersecrets]} {
     exit -1
 }
 
-proc complete {cmd status} {
+proc complete {command status} {
     if { $status } {
-        puts "\[SUC\] => $cmd done, quitting.."
+        puts "\[SUC\] => $command done, quitting.."
     } else {
         puts "done."
     }
@@ -91,7 +91,7 @@ proc uninstall {opt} {
     spawn -noecho sudo mandb
 
     if { $action } {
-        complete $cmd
+        complete $command
     } else {
         puts "Nothing to do, quitting"
     }
@@ -103,7 +103,7 @@ proc parseargs {argc argv} {
     if { $argc == 0 } { help }
 
     set command [lindex $argv 0]
-    set cmd 0
+    set command 0
 
     switch -regexp -- $command {
         {(^git$|^ssh$)} {}
@@ -152,7 +152,7 @@ proc parseargs {argc argv} {
                         {(^saio$)} {
                             if { $iter != 1 } { puts $err_msg; exit -1 }
                             if { $argc == 2 } { puts $err_msg; exit -1 }
-                            set cmd $curr
+                            set command $curr
                         }
 
                         default {}
@@ -168,7 +168,7 @@ proc parseargs {argc argv} {
     }
 
     set other_args [lrange $argv 2 end]
-    set result "$command $cmd \"$other_args\""
+    set result "$command $command \"$other_args\""
     return $result
 }
 
@@ -186,7 +186,7 @@ switch -regexp -- $COMMAND {
                 set status 0
 
                 spawn -noecho git add .
-                spawn -noecho git commit -m "$args"
+                spawn -noecho git commit -m "$arguments"
             
                 spawn -noecho git push
                 expect {
@@ -205,7 +205,7 @@ switch -regexp -- $COMMAND {
                 interact
                 set status 1 
             
-                complete $cmd $status;
+                complete $command $status;
             
                 exit 0
             }
@@ -215,17 +215,17 @@ switch -regexp -- $COMMAND {
 
                 set status 0
 
-                spawn -noecho git $cmd {*}$args
+                spawn -noecho git $command {*}$arguments
                 expect {
-                    timeout { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
-                    eof { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
+                    timeout { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
+                    eof { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
                     "*atal:" { send_user "\n\[ERR\] => error incomes, quitting..\n"; exit -1 }
                     "Username for 'https://github.com':"
                 }
                 send "$USERNAME\r"
                 expect {
-                    timeout { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
-                    eof { if { $cmd == "push" || $cmd == "pull" || $cmd == "clone" } { puts "No auth required" }; complete $cmd; exit 1 }
+                    timeout { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
+                    eof { if { $command == "push" || $command == "pull" || $command == "clone" } { puts "No auth required" }; complete $command 0; exit 1 }
                     "Password for 'https://$USERNAME@github.com':"
                 }
                 send "$TOKEN\r"
@@ -233,7 +233,7 @@ switch -regexp -- $COMMAND {
 
                 set status 1
                 
-                complete $cmd $status;
+                complete $command $status;
                 
                 exit 0
             }
