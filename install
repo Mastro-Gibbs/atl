@@ -292,6 +292,6 @@ echo
 
 if [ $CONFIGURE == "YES" ]; then
     echo
-    exec ./autogitconfigure --initall
+    exec ./config --initall
 fi
 
