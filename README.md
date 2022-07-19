@@ -1,5 +1,16 @@
 # ATL
 
+
+                    █████╗ ████████╗██╗     
+                   ██╔══██╗╚══██╔══╝██║     
+                   ███████║   ██║   ██║     
+                   ██╔══██║   ██║   ██║     
+                   ██║  ██║   ██║   ███████╗
+                   ╚═╝  ╚═╝   ╚═╝   ╚══════╝
+
+
+## Description
+
 ATL is a tool available on GNU/Linux systems that allows you to automate various login and authentication mechanisms such as those required by git and ssh.
 
 ---
