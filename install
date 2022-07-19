@@ -42,7 +42,7 @@ for i in "$@"; do
             FOLDER="${i#*=}"
             if [[ ! -d $FOLDER ]]
             then
-                echo "[ERR] => given path -> $FOLDER does not exits\nquitting.."
+                echo "[ERR] => given path -> $FOLDER does not exits\naborting."
                 exit -1
             fi
             shift 

@@ -24,7 +24,7 @@ if {![file exists $confdir/cache]} {
 
 proc complete {command status} {
     if { $status } {
-        puts "$command done\nquitting.."
+        puts "$command done."
     } else {
         puts "done."
     }
@@ -79,7 +79,7 @@ proc uninstall {opt} {
     set user [exec whoami]
     set cache /home/$user/.atl/cache
 
-    set err_msg "\[\033\[91mERR\033\[00m\] => configuration not found\nquitting.."
+    set err_msg "\[\033\[91mERR\033\[00m\] => configuration not found\nuninstalling aborted."
 
     set extra_msg " "
     if { $opt != "" } {
@@ -103,7 +103,7 @@ proc uninstall {opt} {
                 interact
                 exit 0
             } else {
-                puts "\[\033\[91mERR\033\[00m\] => no script found\nquitting.."
+                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting."
                 exit -1
             }
         } else {
@@ -120,7 +120,7 @@ proc config {opt} {
     set sign "Configure process for"
     signature $sign
 
-    set err_msg "\[\033\[91mERR\033\[00m\] => configuration not found\nquitting.."
+    set err_msg "\[\033\[91mERR\033\[00m\] => configuration not found\naborting."
     set arg 0
     set user [exec whoami]
     set confdir /home/$user/.atl
@@ -150,7 +150,7 @@ proc config {opt} {
                 interact
                 exit 0
             } else {
-                puts "\[\033\[91mERR\033\[00m\] => no script found\nquitting.."
+                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting."
                 exit -1
             }
         } else {
@@ -183,7 +183,7 @@ proc parseargs {argc argv} {
                 if { $tmp == "--purge" } {
                     set opt [lindex $argv 1]
                 } else {
-                    puts "\[\033\[91mERR\033\[00m\] => unknown option '$tmp'\n\trun atl --help\nquitting.."
+                    puts "\[\033\[91mERR\033\[00m\] => unknown option '$tmp'\n\trun atl --help"
                     exit -1
                 }
             }
@@ -193,7 +193,7 @@ proc parseargs {argc argv} {
         {(^config$)} {
             set opt 0
 
-            if { $argc < 2 } { puts "\[\033\[91mERR\033\[00m\] => must specify configure option\nquitting.."; exit -1 }
+            if { $argc < 2 } { puts "\[\033\[91mERR\033\[00m\] => must specify configure option"; exit -1 }
 
             set tmp [lindex $argv 1]
 
@@ -203,7 +203,7 @@ proc parseargs {argc argv} {
                 }
 
                 default {
-                    puts "Unknown option '$tmp'\nquitting.."
+                    puts "Unknown option '$tmp'"
                     exit -1
                 }
             }
@@ -222,7 +222,7 @@ proc parseargs {argc argv} {
     for { set iter 1 } { $iter < $argc } { incr iter } {
         set curr [lindex $argv $iter]
 
-        set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help\nquitting.."
+        set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help"
 
         switch -regexp -- $curr {
             {(^git$|^ssh$|^uninstall$)} { puts $err_msg; exit -1 }
@@ -254,7 +254,7 @@ proc parseargs {argc argv} {
                             if { $argc == 3 && $curr == "remove"} {
                                 set tmp [lindex $argv 2]
                                 if { $tmp != "--purge" } {
-                                    puts "\[\033\[91mERR\033\[00m\] => unknown option '$tmp'\n\trun atl --help\nquitting.."
+                                    puts "\[\033\[91mERR\033\[00m\] => unknown option '$tmp'\n\trun atl --help"
                                     exit -1
                                 }
                             }
@@ -285,7 +285,7 @@ proc get_ssh_entry {opt choice} {
     set entry ""
 
     if { $entries_length == 0 } {
-        puts "No devices found\n\trun 'atl config ssh' to add a device\nquitting.."
+        puts "No devices found\n\trun 'atl ssh add' to add a device"
         exit -1
     }
 
@@ -381,7 +381,7 @@ proc remove_ssh_dev {dev silent purge} {
     }
 
     if { [catch {exec rm -fr "${sshdevs}/${dev}"} fp] } {
-        puts "\[\033\[91mERR\033\[00m\] => something went wrong\nquitting.."
+        puts "\[\033\[91mERR\033\[00m\] => something went wrong"
         exit -1
     } else {
         if { $silent == 0 } {
@@ -428,7 +428,7 @@ proc mod_ssh_dev {dev} {
 
                 interact
             } else {
-                puts "\[\033\[91mERR\033\[00m\] => no script found\nquitting.."
+                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting."
                 exit -1
             }
         } else {
@@ -451,9 +451,9 @@ proc connect_ssh {dev arguments} {
 
     spawn -noecho ssh {*}$arguments $dev
     expect {
-        timeout { puts "Timeout reached\nquitting..\n"; exit -1 }
-        eof { puts "quitting.."; exit -1 }
-        "ssh:" { send_user "\n\[\033\[91mERR\033\[00m\] => an error was generated\nquitting..\n"; exit -1 }
+        timeout { puts "Timeout reached\naborting.\n"; exit -1 }
+        eof { puts "aborting."; exit -1 }
+        "ssh:" { send_user "\n\[\033\[91mERR\033\[00m\] => an error was generated\naborting.\n"; exit -1 }
         "Are you sure you want to continue connecting*" {
             send_user "\nPress \[y/n\] to interact"
             exec /bin/stty raw -echo <@stdin
@@ -470,7 +470,7 @@ proc connect_ssh {dev arguments} {
         }
 
         "Permission denied, please try again." {
-            puts "\n\n\[\033\[91mERR\033\[00m\] => wrong credentials for $dev\n\trun 'atl ssh modify' and change the data for this host\nquitting.."
+            puts "\n\n\[\033\[91mERR\033\[00m\] => wrong credentials for $dev\n\trun 'atl ssh modify' and change the data for this host"
             exit -1
         }
         
@@ -501,7 +501,7 @@ proc ssh_add {} {
                 interact
                 exit 0
             } else {
-                puts "\[\033\[91mERR\033\[00m\] => no script found\nquitting.."
+                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting"
                 exit -1
             }
         } else {
@@ -545,17 +545,14 @@ switch -regexp -- $COMMAND {
             
                 spawn -noecho git push
                 expect {
-                    timeout { puts "Timeout reached\nquitting.."; exit -1 }
+                    timeout { puts "Timeout reached\naborting."; exit -1 }
                     eof { complete $command $status; exit 1 }
-                    "*atal:" { send_user "\n\[\033\[91mERR\033\[00m\] => error was generated\nquitting.."; exit -1 }
+                    "*atal:" { send_user "\n\[\033\[91mERR\033\[00m\] => error was generated\naborting."; exit -1 }
                     "Username for 'https://github.com':" {
                         send "$USERNAME\r"
+                        exp_continue
                     }
-                }
                 
-                expect {
-                    timeout { puts "Timeout reached\nquitting.."; exit -1 }
-                    eof { complete $command $status; exit 1 }
                     "Password for 'https://$USERNAME@github.com':" {
                         send "$TOKEN\r"
                     }
@@ -577,17 +574,14 @@ switch -regexp -- $COMMAND {
                 spawn -noecho git $command {*}$arguments
 
                 expect {
-                    timeout { puts "Timeout reached\nquitting.."; exit -1 }
+                    timeout { puts "Timeout reached\naborting."; exit -1 }
                     eof { complete $command $status; exit 1 }
-                    "*atal:" { send_user "\n\[\033\[91mERR\033\[00m\] => error was generated\nquitting.."; exit -1 }
+                    "*atal:" { send_user "\n\[\033\[91mERR\033\[00m\] => error was generated\naborting."; exit -1 }
                     "Username for 'https://github.com':" {
                         send "$USERNAME\r"
+                        exp_continue
                     }
-                }
                 
-                expect {
-                    timeout { puts "Timeout reached\nquitting.."; exit -1 }
-                    eof { complete $command $status; exit 1 }
                     "Password for 'https://$USERNAME@github.com':" {
                         send "$TOKEN\r"
                     }
