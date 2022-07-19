@@ -101,10 +101,8 @@ proc version {} {
     signature $sign
 
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3 \[BETA\]"
-    puts ""
-    puts "Developed by Stefano Fattore aka MastroGibbs"
-    puts ""
+    puts "  0.3 \[BETA\]\n"
+    puts "Developed by Stefano Fattore aka MastroGibbs\n"
     exit 0
 }
 
