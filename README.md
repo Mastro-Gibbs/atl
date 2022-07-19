@@ -29,9 +29,8 @@
 
 # TODO
 - rewrite readme/man page
-- rewrite atl help section
 
 ---
 
-#### version BETA 0.2
+#### version BETA 0.2.1
 
