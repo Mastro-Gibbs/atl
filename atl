@@ -200,7 +200,10 @@ proc config {opt} {
 }
 
 proc parseargs {argc argv} {
-    if { $argc == 0 } { help }
+    if { $argc == 0 } { 
+        set section "atl"
+        help $section
+    }
 
     set COMMAND [lindex $argv 0]
     set command 0
@@ -256,7 +259,9 @@ proc parseargs {argc argv} {
         }
     }
 
-    if { $argc == 1 } { help }
+    if { $argc == 1 } {
+        help $COMMAND
+    }
 
     for { set iter 1 } { $iter < $argc } { incr iter } {
         set curr [lindex $argv $iter]
