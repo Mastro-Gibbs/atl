@@ -1,0 +1,116 @@
+'\" t
+.\"     Title: atl-git
+.\"    Author: [see the "Authors" section]
+.\"      Date: 04/25/2022
+.\"    Manual: Atl-git Manual
+.\"    Source: atl 0.3 BETA
+.\"  Language: English
+.\"
+.TH "ATL\-GIT" "1" "07/19/2022" "Atl 0\&.2\&.1" "Atl\-git Manual"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.nh
+.ad l
+.SH "NAME"
+atl\-git \- atl for git
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIatl git\fR [\-v|\-\-version] [\-v|\-\-help] 
+        [<commands>] [<args>|<options>]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Atl\-git is a tool that can automate console git login processes\&.
+.SH "ATL\-GIT OPTIONS"
+.PP
+\fB\-\-version\fR | \fB\-v\fR
+.RS 4
+Prints the \fIAtl\fR version\&.
+.sp
+.RE
+.PP
+\fB\-\-help\fR | \fB\-h\fR
+.RS 4
+Prints the helper for \fIAtl\-git\fR\&.
+.RE
+.SH "ATL\-GIT COMMANDS"
+.PP
+\fBGit commands suite\fR
+.RS 4
+Runs git suite wrapped by \fIAtl\fR\&.
+.sp
+.RE
+.PP
+\fBsaio <message>\fR
+.RS 4
+Aka \'simple all in one\', runs multiple git commands like \'add .\', \'commit -m <message>\' and \'push\'\&.
+.RE
+.RS 4
+Must be combined with an argument, the latter representing the message to be passed to the commit\&. 
+.RE
+.RS 4
+Double quotes can be omitted, providing a list of arguments\&. 
+.RE
+.RS 4
+In case of missing arguments an exception will be raised, closing the procedure of \'saio\'\&.
+.RE
+.RS 4
+By invoking this command a simple push will be performed, automated\&.
+.sp
+.RE
+.PP
+
+.SH EXAMPLES
+.sp
+.RE
+.PP
+\fBatl git add \&.\fR
+.RS 4
+Git classic command \'add .\'\&.
+.RE
+.RS 4
+See \fBgit-add\fR(1)\&.
+.sp
+.RE
+.PP
+\fBatl git saio \[lq]commit message example\[rq]\fR
+.RS 4
+See \fBatl git\fR(1)\&.
+Perform \'saio\' command\&.
+.sp
+.RE
+.PP
+\fBatl git push origin \[lq]branch-name\[rq]\fR
+.RS 4
+Perform a git push command on specified branch, automated\&.
+.sp
+.RE
+.PP
+.SH EXIT VALUES
+.TP
+\f[B]-1\f[R]
+.RE
+On error\&.
+.TP
+\f[B]0\f[R]
+.RE
+On success\&.
+.sp
+.TP
+\f[B]1\f[R]
+.RE
+When auth is not required\&.
+.RE
+.SH "AUTHORS"
+.sp
+Stefano Fattore aka MastroGibbs
+.SH "SEE ALSO"
+.sp
+\fBatl\fR(1), \fBatl ssh\fR(1)
+.SH COPYRIGHT
+.PP
+Copyright (C) 2022 Stefano Fattore\&.
+License GNU GENERAL PUBLIC LICENSE v3\&.
+.RE

@@ -1,0 +1,166 @@
+'\" t
+.\"     Title: atl
+.\"    Author: [see the "Authors" section]
+.\"      Date: 04/25/2022
+.\"    Manual: Atl-ssh Manual
+.\"    Source: Atl 0.3 BETA
+.\"  Language: English
+.\"
+.TH "ATL\-SSH" "1" "07/19/2022" "Atl 0\&.2\&.1" "Atl\-ssh Manual"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.nh
+.ad l
+.SH "NAME"
+atl\-ssh \- autotool for ssh connections
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIat\-sshl\fR [\-v|\-\-version] [\-v|\-\-help] 
+        [<commands>|<options>] [<args>|<options>]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Atl-ssh is a tool that can automate console login processes for ssh\&.
+.sp
+See \fBman atl\fR(1) and \fBman atl-git\fR(1) to get started\&.
+.SH "ATL OPTIONS"
+.PP
+\fB\-\-version\fR | \fB\-v\fR
+.RS 4
+Prints the \fIAtl\fR version\&.
+.sp
+.RE
+.PP
+\fB\-\-help\fR | \fB\-h\fR
+.RS 4
+Prints the helper for \fIAtl-ssh\fR\&.
+.RE
+.SH "ATL-SSH COMMANDS"
+.PP
+\fBssh commands suite\fR
+.RS 4
+Runs ssh suite wrapped by \fIAtl\fR\&.
+.sp
+.RE
+.PP
+\fBadd\fR
+.RS 4
+Runs the script to add a new host to the list of known hosts\&. 
+.RE
+.RS 4
+If the host already exists, it will be overwritten.
+.sp
+.RE
+.PP
+\fBshow\fR
+.RS 4
+Runs the routine which shows the list of known hosts\&. 
+.sp
+.RE
+.PP
+\fBmodify\fR
+.RS 4
+Runs the script to modify a known host from the list of known hosts\&. 
+.RE
+.RS 4
+The list of known hosts will be shown, in paged format from which you can select the page number and the chosen host.
+.sp
+.RE
+.PP
+\fBremove\fR
+.RS 4
+Runs the script to remove a known host from the list of known hosts\&. 
+.RE
+.RS 4
+The list of known hosts will be shown, in paged format from which you can select the page number and the chosen host.
+.RE
+.RS 4
+The selected host will be deleted and then regenerated\&.
+.RE
+.RS 4
+This command can be combined with the \'\-\-purge\' option to remove the ssh-key stored in \'~/.ssh/known_hosts\'\&.
+.sp
+.RE
+.PP
+\fBconnect\fR
+.RS 4
+Runs the routine to connect to a known host from the list of known hosts\&. 
+.RE
+.RS 4
+The list of known hosts will be shown, in paged format from which you can select the page number and the chosen host\&.
+.RE
+.RS 4
+Connection to the selected host will be attempted\&.
+.RE
+.RS 4
+There may be moments of waiting based on the response from the host itself\&.
+.RE
+.RS 4
+If there is a long wait, a timeout exception might be raised\&.
+.RE
+.RS 4
+If the password is incorrect, a new attempt will be made, if the connection still fails, 
+.RE
+.RS 4
+it will be advised to modify the data of the saved host\&. Automated\&.
+.sp
+.RE
+.PP
+
+.PP
+.SH EXAMPLES
+.sp
+.RE
+.PP
+\fBatl git ssh show\fR
+.RS 4
+Prints known hosts\&.
+.sp
+.RE
+.PP
+\fBatl ssh add\fR
+.RS 4
+Adds a new host data\&.
+.sp
+.RE
+.PP
+\fBatl ssh connect\fR
+.RS 4
+Try to enstablish a connection to a selected host\&.
+.sp
+.RE
+.PP
+\fBatl ssh remove \-\-purge\fR
+.RS 4
+Remove host from known host, \-\-purge option will remove ss-key from \'~/.ssh/known_hosts\'\&.
+.sp
+.RE
+.PP
+.SH EXIT VALUES
+.TP
+\f[B]-1\f[R]
+.RE
+On error\&.
+.TP
+\f[B]0\f[R]
+.RE
+On success\&.
+.sp
+.TP
+\f[B]1\f[R]
+.RE
+When auth is not required\&.
+.RE
+.SH "AUTHORS"
+.sp
+Stefano Fattore aka MastroGibbs
+.SH "SEE ALSO"
+.sp
+\fBatl git\fR(1), \fBatl\fR(1)
+.SH COPYRIGHT
+.PP
+Copyright (C) 2022 Stefano Fattore\&.
+License GNU GENERAL PUBLIC LICENSE v3\&.
+.RE
