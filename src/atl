@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3
+# version BETA 0.3.1
 
 set user [exec whoami]
 set gitss /home/$user/.atl/git/ss
@@ -101,7 +101,7 @@ proc version {} {
     signature $sign
 
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3 \[BETA\]\n"
+    puts "  0.3.1 \[BETA\]\n"
     puts "Developed by Stefano Fattore aka MastroGibbs\n"
     exit 0
 }
@@ -385,26 +385,36 @@ proc get_ssh_entry {opt choice} {
     
         set valid [string is integer $sindex]
 
-        set _page 1
-        if { $spage > 1 } {
-            set _page [expr {$spage - 1}]
-        }
+        
+        set _page [expr {$spage - 1}]
         set _page [expr {$_page * 8}]
-        set availables [expr { [llength $entries] - $_page }]
-        set availables [expr { [llength $entries] - $availables }]
-        while { ! $valid || $sindex <= 0 || $sindex > [llength $entries] || $sindex > [expr { [llength $entries] - $availables }] } {
+        
+        if { $valid && $sindex == 0 } {
+            set valid 0
+        } elseif { $valid && $sindex > 8 } {
+            set valid 0
+        } elseif { $valid } {
+            set sindex [expr {$_page + $sindex}]
+        }
+        while { ! $valid || $sindex <= 0 || $sindex > [llength $entries] } {
             puts "\033\[91minvalid index\033\[00m"
             exec /bin/stty raw -echo <@stdin
             set sindex [read stdin 1]
             exec /bin/stty -raw echo <@stdin
             set valid [string is integer $sindex]
+            
+            if { $valid && $sindex == 0 } {
+                set valid 0
+            } elseif { $valid && $sindex > 8 } {
+                set valid 0
+            } elseif { $valid } {
+                set sindex [expr {$_page + $sindex}]
+            }
         }
 
         puts "Selected index: \033\[97m$sindex\033\[00m"
     
-        set spage [expr {$spage - 1}]
-        set spage [expr {$spage * 8}]
-        set entry [lindex $entries [expr { [expr {$spage + $sindex}] - 1}]]
+        set entry [lindex $entries [expr { $sindex - 1}]]
     }
     
     return $entry
@@ -495,7 +505,7 @@ proc connect_ssh {dev arguments} {
     spawn -noecho ssh {*}$arguments $dev
     expect {
         timeout { puts "Timeout reached\naborting.\n"; exit -1 }
-        eof { puts "aborting."; exit -1 }
+        eof { puts "done."; exit -1 }
         "ssh:" { send_user "\n\[\033\[91mERR\033\[00m\] => an error was generated\naborting.\n"; exit -1 }
         "Are you sure you want to continue connecting*" {
             send_user "\nPress \[y/n\] to interact"
@@ -708,9 +718,10 @@ switch -regexp -- $COMMAND {
             }
 
             default {
-                # dummy
-                puts "?"
-                exit -1
+                set dev ""
+                connect_ssh $arguments $dev
+
+                exit 0
             }
         }
         exit 0
