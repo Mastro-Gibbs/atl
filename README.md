@@ -1,9 +1,3 @@
-# ATL 
-
-[![forthebadge](https://img.shields.io/badge/BASH-BASED-gray?style=for-the-badge&logo=gnubash&labelColor=117711&logoColor=darkgray)](https://img.shields.io)
-[![forthebadge](https://img.shields.io/badge/expect-based-gray?style=for-the-badge&labelColor=critical)](https://img.shields.io)  
-
-[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)  
 
      █████╗ ████████╗██╗     
     ██╔══██╗╚══██╔══╝██║     
@@ -11,6 +5,9 @@
     ██╔══██║   ██║   ██║     
     ██║  ██║   ██║   ███████╗
     ╚═╝  ╚═╝   ╚═╝   ╚══════╝  
+
+[![forthebadge](https://img.shields.io/badge/BASH-BASED-gray?style=for-the-badge&logo=gnubash&labelColor=117711&logoColor=darkgray)](https://img.shields.io)
+[![forthebadge](https://img.shields.io/badge/expect-based-gray?style=for-the-badge&labelColor=critical)](https://img.shields.io)  
 
 [![forthebadge](https://img.shields.io/badge/version-0.3-important)](https://img.shields.io)  
 
