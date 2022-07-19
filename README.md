@@ -1,13 +1,20 @@
-# ATL
+# ATL 
 
+[![forthebadge](https://img.shields.io/badge/BASH-BASED-gray?style=for-the-badge&logo=gnubash&labelColor=117711&logoColor=darkgray)](https://img.shields.io)
+[![forthebadge](https://img.shields.io/badge/expect-based-gray?style=for-the-badge&labelColor=critical)](https://img.shields.io)
 
-                    █████╗ ████████╗██╗     
-                   ██╔══██╗╚══██╔══╝██║     
-                   ███████║   ██║   ██║     
-                   ██╔══██║   ██║   ██║     
-                   ██║  ██║   ██║   ███████╗
-                   ╚═╝  ╚═╝   ╚═╝   ╚══════╝
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
+ █████╗ ████████╗██╗     
+██╔══██╗╚══██╔══╝██║     
+███████║   ██║   ██║     
+██╔══██║   ██║   ██║     
+██║  ██║   ██║   ███████╗
+╚═╝  ╚═╝   ╚═╝   ╚══════╝
+
+[![forthebadge](https://img.shields.io/badge/version-0.3-important)](https://img.shields.io)
+
+---
 
 ## Description
 
@@ -68,7 +75,7 @@ A script will be executed that will interactively ask for the credentials, which
 ```bash
 $ atl ssh add
 ```
-or, but read man page for atl
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or, but read man page for atl:
 ```bash
 $ atl config ssh
 ```
@@ -93,9 +100,6 @@ $ atl ssh connect
 - **atl-ssh**(1)
 
 ---
-
-## Version
-BETA 0.3
 
 ## License
 [GPLV3](https://github.com/Mastro-Gibbs/atl/blob/main/LICENSE.md)
