@@ -264,7 +264,7 @@ proc parseargs {argc argv} {
     for { set iter 1 } { $iter < $argc } { incr iter } {
         set curr [lindex $argv $iter]
 
-        set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help"
+        set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help $iter"
 
         switch -regexp -- $curr {
             {(^git$|^ssh$|^uninstall$|^config$)} { puts $err_msg; exit -1 }
@@ -303,7 +303,8 @@ proc parseargs {argc argv} {
                         }
 
                         default {
-                            if { $iter == 1 } { puts $err_msg; exit -1 }
+                            # problems
+                            # if { $iter == 1 } { puts $err_msg; exit -1 }
                         }
                     }
                 }
