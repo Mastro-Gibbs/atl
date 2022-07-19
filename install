@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.1
+# version BETA 0.3
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"
@@ -103,6 +103,11 @@ if [ $response == "y" ] || [ $response == "Y" ]; then
     FOLDER=$FIND
 else
     if [ $response != "y" ] || [ $response != "Y" ]; then
+        if [ $PREFIX -eq 0 ]; then
+            echo "No prefix passed"
+            echo "Aborting."
+            exit -1
+        fi
         if ! rm -rf $FIND; then
             echo "An error occurred, exiting"
             exit -1
@@ -128,9 +133,17 @@ fi
 echo "Copying the executable into ${FOLDER}"
 
 # DIRS & FILES checking/copying
+if [[ ! -d "${FOLDER}" ]]
+then
+    if ! mkdir "${FOLDER}"; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+fi
+
 if [[ ! -d "${FOLDER}bin" ]]
 then
-    if ! mkdir "${FOLDER}/bin"; then
+    if ! mkdir "${FOLDER}bin"; then
         echo "An error occurred, exiting"
         exit -1
     fi
@@ -138,7 +151,7 @@ fi
 
 if [[ ! -d "${FOLDER}man" ]]
 then
-    if ! mkdir "${FOLDER}/man"; then
+    if ! mkdir "${FOLDER}man"; then
         echo "An error occurred, exiting"
         exit -1
     fi
@@ -146,7 +159,7 @@ fi
 
 if [[ ! -d "${FOLDER}man/man1" ]]
 then
-    if ! mkdir "${FOLDER}/man/man1"; then
+    if ! mkdir "${FOLDER}man/man1"; then
         echo "An error occurred, exiting"
         exit -1
     fi
@@ -211,6 +224,32 @@ fi
         echo "An error occurred, exiting"
         exit -1
     fi
+
+    if ! cp atl-git.1 ${FOLDER}man/man1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! gzip ${FOLDER}man/man1/atl-git.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! rm -f ${FOLDER}man/man1/atl-git.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+
+    if ! cp atl-ssh.1 ${FOLDER}man/man1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! gzip ${FOLDER}man/man1/atl-ssh.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if ! rm -f ${FOLDER}man/man1/atl-ssh.1; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
 } &> /dev/null
 # MAN end
 
@@ -249,9 +288,19 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
         fi
     fi
 
-    # man SOFT LINK ( no sudo )
+    # man SOFT LINK
     {
         if ! sudo ln -sf "${FOLDER}man/man1/atl.1.gz" /usr/share/man/man1/atl.1.gz; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+
+        if ! sudo ln -sf "${FOLDER}man/man1/atl-git.1.gz" /usr/share/man/man1/atl-git.1.gz; then
+            echo "An error occurred while generating entry for man, exiting"
+            exit -1
+        fi
+
+        if ! sudo ln -sf "${FOLDER}man/man1/atl-ssh.1.gz" /usr/share/man/man1/atl-ssh.1.gz; then
             echo "An error occurred while generating entry for man, exiting"
             exit -1
         fi

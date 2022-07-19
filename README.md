@@ -32,5 +32,5 @@
 
 ---
 
-#### version BETA 0.2.1
+#### version BETA 0.3
 

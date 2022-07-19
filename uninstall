@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.1
+# version BETA 0.3
 
 PURGE=0
 
@@ -43,18 +43,15 @@ i=$(who | awk '{print $1}' | head -n 1)
 basedir="/home/$i/.atl"
 action=0
 
-if [ $PURGE -eq 1 ]; then
-    if [[ -f "${basedir}/cache" ]]
+if [[ -f "${basedir}/cache" ]]
+then
+    FIND=$(head -n1 ${basedir}/cache)
+    if [[ $FIND != "" ]]
     then
-        FIND=$(head -n1 ${basedir}/cache)
-        if [[ $FIND != "" ]]
-        then
-            rm -rf $FIND
-            action=1
-        fi
+        rm -rf $FIND
+        action=1
     fi
 fi
-
 
 if [ $PURGE -eq 1 ]; then
     if [[ -d "/home/$i/.atl" ]]
@@ -69,7 +66,6 @@ if [ $PURGE -eq 1 ]; then
     fi
 fi
 
-
 if [[ -f "/usr/local/bin/atl" ]]
 then
     echo "Removing executable"
@@ -77,10 +73,12 @@ then
     action=1
 fi
 
-if [[ -f "/usr/share/man/man1/atl.1.gz" ]]
+if [[ -f "/usr/share/man/man1/atl.1.gz" ]] && [[ -f "/usr/share/man/man1/atl-git.1.gz" ]] && [[ -f "/usr/share/man/man1/atl-ssh.1.gz" ]]
 then
-    echo "Removing entry for man-db"
+    echo "Removing entries for man-db"
     sudo rm -f /usr/share/man/man1/atl.1.gz
+    sudo rm -f /usr/share/man/man1/atl-git.1.gz
+    sudo rm -f /usr/share/man/man1/atl-ssh.1.gz
     
     echo "Elaborating trigger for man-db"
     {

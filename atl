@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.2.1
+# version BETA 0.3
 
 set user [exec whoami]
 set gitss /home/$user/.atl/git/ss
@@ -101,7 +101,7 @@ proc version {} {
     signature $sign
 
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.2.1 \[BETA\]"
+    puts "  0.3 \[BETA\]"
     puts ""
     puts "Developed by Stefano Fattore aka MastroGibbs"
     puts ""
@@ -269,7 +269,7 @@ proc parseargs {argc argv} {
         set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help"
 
         switch -regexp -- $curr {
-            {(^git$|^ssh$|^uninstall$)} { puts $err_msg; exit -1 }
+            {(^git$|^ssh$|^uninstall$|^config$)} { puts $err_msg; exit -1 }
 
             {(^\-h$|^\-\-help$)} { help $COMMAND }
     
