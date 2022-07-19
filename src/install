@@ -101,25 +101,24 @@ fi
 
 if [ $response == "y" ] || [ $response == "Y" ]; then
     FOLDER=$FIND
-else
-    if [ $response != "y" ] || [ $response != "Y" ]; then
-        if [ $PREFIX -eq 0 ]; then
-            echo "No prefix passed"
-            echo "Aborting."
-            exit -1
-        fi
-        if ! rm -rf $FIND; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
+    if ! rm -rf $FIND; then
+        echo "An error occurred, exiting"
+        exit -1
     fi
-    FOLDER="${FOLDER}/Atl"
-    if [[ ! -d "${FOLDER}" ]]
-    then
-        if ! mkdir "${FOLDER}"; then
-            echo "An error occurred, exiting"
-            exit -1
-        fi
+else
+    if [ $PREFIX -eq 0 ]; then
+        echo "No prefix passed"
+        echo "Aborting."
+        exit -1
+    fi
+    if ! rm -rf $FIND; then
+        echo "An error occurred, exiting"
+        exit -1
+    fi
+    if [ ${FOLDER: -1} != "/" ]; then
+        FOLDER="${FOLDER}/Atl"
+    else
+        FOLDER="${FOLDER}Atl"
     fi
 fi
 
@@ -250,7 +249,7 @@ fi
         echo "An error occurred, exiting"
         exit -1
     fi
-} &> /dev/null
+} 
 # MAN end
 
 # atl SOFT LINK to /usr/local/bin
@@ -304,7 +303,7 @@ if [ $response == "Y" ] || [ $response == "y" ]; then
             echo "An error occurred while generating entry for man, exiting"
             exit -1
         fi
-    } &> /dev/null
+    }
     
 
     echo

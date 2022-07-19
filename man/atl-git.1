@@ -103,6 +103,21 @@ On success\&.
 .RE
 When auth is not required\&.
 .RE
+.SH KNOWN BUGS
+.TP
+\f[B]atl git add *\f[R] and \f[B]atl git commit -m \[lq]message\[rq]\f[R]
+.RE
+.RS 4
+These commands can cause undefined behavior if:
+.RE
+.RS 4
+.IP \[bu] 2
+Files with the same name as the commands with 'git add *' are added\&.
+.RE
+.RS 4
+.IP \[bu] 2
+If there are words in the 'git commit -m <message>' message that are commands of atl\&.
+.RE
 .SH "AUTHORS"
 .sp
 Stefano Fattore aka MastroGibbs
