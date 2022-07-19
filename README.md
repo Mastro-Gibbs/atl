@@ -28,9 +28,10 @@
 ---
 
 # TODO
-- testing
+- rewrite readme/man page
+- rewrite atl help section
 
 ---
 
-#### version BETA 0.1.3
+#### version BETA 0.2
 
