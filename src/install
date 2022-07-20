@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.2
+# version BETA 0.3.3
 
 if [ $(whoami) == "root" ]; then
     echo "[ERR] => re-run installer without sudo privileges"
@@ -77,6 +77,9 @@ signature
 
 if [ $CONFIGURE -eq 1 ]; then
     ./config --deps
+    ret_code=$?
+else
+    ./config --silent --checkdeps
     ret_code=$?
 fi
 
@@ -331,7 +334,9 @@ if [ $ret_code -eq 0 ]; then
 
     echo "done."
 else
-    echo "Dependencies not satisfied"
+    echo "Dependencies not satisfied:"
+    echo "It can probably be caused by missing or incorrect packages for your distro,"
+    echo "by running this script for the first time without the '--configure' option."
     echo "aborting."
 fi
 

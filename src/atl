@@ -8,7 +8,7 @@
 set user [exec whoami]
 
 if { $user == "root" } {
-    puts "\[\033\[91mERR\033\[00m\] => superuser or root user non allowed\nquitting."
+    puts "\[\033\[91mERR\033\[00m\] => superuser or root user not allowed\nquitting."
     exit -1
 }
 

@@ -3,9 +3,9 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.3
+# version BETA 0.3.4
 
-
+CHECKDEPENDECIES=0
 DEPENDECIES=0
 GITDATA=0
 SSHDATA=0
@@ -114,6 +114,10 @@ for i in "$@"; do
         SILENT=1
         shift 
         ;;
+    --checkdeps)
+        CHECKDEPENDECIES=1
+        shift 
+        ;;
     -*|--*)
         echo "Unknown option $i"
         echo "Please run ./config --help"
@@ -128,11 +132,6 @@ done
 # ARGS check
 if [ $COUNT -eq 0 ]; then
     echo "[ERR] => No args detected, use --help for tips"
-    exit -1
-fi
-
-if [ $COUNT -gt 1 ]; then
-    echo "[ERR] => Too much args, use --help for tips"
     exit -1
 fi
 # ARGS check end
@@ -336,10 +335,12 @@ ssh_store(){
 }
 
 dependencies(){
-    echo
-    echo "==============================================="
-    echo "           Checking dependencies"
-    echo "==============================================="
+    if [ $SILENT -eq 0 ]; then
+        echo
+        echo "==============================================="
+        echo "           Checking dependencies"
+        echo "==============================================="
+    fi
 
     PACKAGE=""
     REQUIRED_PKG=()
@@ -358,14 +359,30 @@ dependencies(){
     fi
 
     if [ ${#REQUIRED_PKG[@]} -eq 0 ]; then
-        echo "done."
-        echo "==============================================="
-        echo "       All dependencies are satisfied"
-        echo "==============================================="
+        if [ $SILENT -eq 0 ]; then
+            echo "Nothing to do here."
+            echo "==============================================="
+            echo "       All dependencies are satisfied"
+            echo "==============================================="
+        fi
         exit 0
     else
         PACKAGE=$(printf " %s" "${REQUIRED_PKG[@]}")
         PACKAGE=${PACKAGE:1}
+
+        if [ $CHECKDEPENDECIES -eq 1 ]; then
+            if [ $SILENT -eq 0 ]; then
+                echo "done."
+                echo "==============================================="
+                echo "      The following packages are missing:"
+                for pkg in ${PACKAGE[@]}; do
+                    echo "      - $pkg"
+                done
+                echo "==============================================="
+                echo "Re-run this script with option --deps to install them."
+            fi
+            exit -1
+        fi
 
         echo "done."
         echo "==============================================="
@@ -396,7 +413,7 @@ dependencies(){
 
             echo
             echo "==============================================="
-            echo "Package $PACKAGE installed successfully"
+            echo "Package/s $PACKAGE installed successfully"
             echo "==============================================="
             exit 0
         else
@@ -425,6 +442,10 @@ if [ $SSHSTORE -eq 1 ]; then
 fi
 
 if [ $DEPENDECIES -eq 1 ]; then
+    dependencies
+fi
+
+if [ $CHECKDEPENDECIES -eq 1 ]; then
     dependencies
 fi
 
