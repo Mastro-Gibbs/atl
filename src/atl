@@ -6,6 +6,12 @@
 # version BETA 0.3.2
 
 set user [exec whoami]
+
+if { $user == "root" } {
+    puts "\[\033\[91mERR\033\[00m\] => superuser or root user non allowed\nquitting."
+    exit -1
+}
+
 set gitss /home/$user/.atl/git/ss
 set gitpw /home/$user/.atl/git/conf/encr
 set manpage /usr/share/man/man1/atl.1.gz
