@@ -17,7 +17,6 @@ set gitpw /home/$user/.atl/git/conf/encr
 set manpage /usr/share/man/man1/atl.1.gz
 set confdir /home/$user/.atl
 set sshdevs /home/$user/.atl/ssh
-set executable /usr/local/bin/atl
 
 set COMMAND 0
 set command 0
