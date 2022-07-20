@@ -800,6 +800,9 @@ switch -regexp -- $COMMAND {
                 set dev ""
                 connect_ssh $dev $arguments 
 
+                set status 0
+                complete $command $status
+                
                 exit 0
             }
         }
