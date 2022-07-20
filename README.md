@@ -117,8 +117,8 @@ This command will ask you interactively if you want to **archive** this new host
 None for now.
 
 - **shh**  
-If a connection has been established with X11,  
-when you try to disconnect with the exit command, the tool waits endlessly,  
+If a connection has been established with **X11**,  
+when you try to disconnect with the exit command, the tool **maybe waits endlessly**,  
 pressing the following command can solve it.
    ```bash
    $ ctrl+c
