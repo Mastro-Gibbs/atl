@@ -22,6 +22,17 @@ ATL is a tool available on GNU/Linux systems that allows you to automate various
 
 ---
 
+## Dependencies
+
+To run this tool you need four dependencies:
+- Obviously **git** and **ssh**
+- **expect**
+- **openssl**
+
+Take a look at the [installation](https://github.com/Mastro-Gibbs/atl#installation) process to resolve those dependencies.
+
+---
+
 ## Supported package managers 
 - [x] apt / apt-get
 - [x] dnf
@@ -38,7 +49,10 @@ $ git clone <http_to_this_repo>
 $ cd atl/src/
 $ ./install --configure --prefix=<preferred_installation_path>
 ```
-The interactive installer will start, it will ask you if you want to generate a soft link in ```/usr/local/bin``` for the executable and three soft links for the manual pages in ```/usr/share/man/man1```.  
+The interactive installer will start.  
+It will first run a **check on dependencies**, if given ```--configure``` it will try to install them.  
+If they are **already satisfied**, the installation will proceed **otherwise** an explanatory error will be raised.  
+It will ask you if you want to generate a soft link in ```/usr/local/bin``` for the executable and three soft links for the manual pages in ```/usr/share/man/man1```.  
 It's up to you to choose whether to create them or not.  
 In case of reinstallation, the script will identify the previous installation and will ask whether to overwrite it or not.  
 In both cases the previous installation will be removed.
