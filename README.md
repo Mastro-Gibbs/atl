@@ -38,7 +38,7 @@ Clone or fork this repository, get the source code, run:
 
 
 ```bash
-$ cd src/
+$ cd atl/src/
 $ ./install --configure --prefix=<preferred_installation_path>
 ```
 The interactive installer will start, it will ask you if you want to generate a soft link in ```/usr/local/bin``` for the executable and three soft links for the manual pages in ```/usr/share/man/man1```.  
@@ -54,32 +54,32 @@ In both cases the previous installation will be removed.
 ## Uninstall
 ##### There are two ways to go:
 * Tool only removal
-```bash
-$ atl uninstall
-```
+  ```bash
+  $ atl uninstall
+  ```
 
 * Tool and configuration folder removal
-```bash
-$ atl uninstall --purge
-```
+  ```bash
+  $ atl uninstall --purge
+  ```
 ---
 
 ## GIT and SSH configure
 * For **git** run the following command.  
 A script will be executed that will interactively ask for credentials, which will be **encrypted** and saved in ```/home/<user>/.atl/git/```.
-```bash
-$ atl config git
-```   
+  ```bash
+  $ atl config git
+  ```   
 
 * For **ssh** run the following command.  
 A script will be executed that will interactively ask for the credentials, which will be **encrypted** and saved in a **relative** and **personal folder** for the host entered, in ```/home/<user>/.atl/ssh/```.
-```bash
-$ atl ssh add
-```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or, but read man page for atl:
-```bash
-$ atl config ssh
-```
+  ```bash
+  $ atl ssh add
+  ```
+  or, but read man page for atl:
+  ```bash
+  $ atl config ssh
+  ```
 
 
 ---
@@ -99,6 +99,20 @@ $ atl ssh connect
 - **atl**(1)
 - **atl-git**(1)
 - **atl-ssh**(1)
+
+---
+
+## Known bugs
+- **git**  
+None for now.
+
+- **shh**  
+If a connection has been established with X11,  
+when you try to disconnect with the exit command, the tool waits endlessly,  
+pressing the following command can solve it.
+   ```bash
+   $ ctrl+c
+   ``` 
 
 ---
 
