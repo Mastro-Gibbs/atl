@@ -3,7 +3,7 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.1
+# version BETA 0.3.2
 
 set user [exec whoami]
 set gitss /home/$user/.atl/git/ss
@@ -65,8 +65,8 @@ proc help {section} {
         puts "\033\[01m\033\[97mSynopsis:\033\[00m\n\tatl <options> | \[COMMAND\] \[command\] <options>\n"
         puts "\033\[01m\033\[97mCommands:\033\[00m\n\t\033\[97mgit \[command\] <options>\033\[00m\n\tcan run git commands, automated\n"
         puts "\t\033\[97mssh \[command\] <option>\033\[00m\n\tcan run ssh commands, automated\n"
-        puts "\t\033\[97muninstall <option>\033\[00m\n\tuninstall alt, can be combined with option --purge\n\tto remove configuration folder\n"
-        puts "\t\033\[97mconfig <option>\033\[00m\n\tconfig a service, must be combined with arguments like \033\[97mgit\033\[00m\n\tto set git data and \033\[97mssh\033\[00m to add a device if not exists\n\totherwise it will be replaced\n"
+        puts "\t\033\[97m--uninstall <option>\033\[00m\n\tuninstall alt, can be combined with option --purge\n\tto remove configuration folder\n"
+        puts "\t\033\[97m--config <option>\033\[00m\n\tconfig a service, must be combined with arguments like \033\[97mgit\033\[00m\n\tto set git data and \033\[97mssh\033\[00m to add a device if not exists\n\totherwise it will be replaced\n"
         puts "\033\[01m\033\[97mOptions:\033\[00m\n\t-v|--version for version\n"
         puts "\t-h|--help for helper\n"
     
@@ -83,11 +83,11 @@ proc help {section} {
         puts "\033\[01m\033\[97mName:\033\[00m\n\tatl ssh - autotool for ssh\n"
         puts "\033\[01m\033\[97mDescription:\033\[00m\n\twrap ssh commands and automatize them.\n"
         puts "\033\[01m\033\[97mSynopsis:\033\[00m\n\t- atl ssh \[command\] <options>\n\t- see ssh synopsis\n"
-        puts "\033\[01m\033\[97mCommands:\033\[00m\n\t\033\[97madd\033\[00m\n\tadd a device to known host devices\n"
-        puts "\t\033\[97mremove <option>\033\[00m\n\tremove a device from known host devices, can be combined with option --purge\n\tto remove device ssh-key\n"
-        puts "\t\033\[97mmodify\033\[00m\n\tmodify a device from known host devices\n"
-        puts "\t\033\[97mconnect <args|options>\033\[00m\n\tconnect to known device with ssh args and options, automated\n"
-        puts "\t\033\[97mshow\033\[00m\n\tshow known host devices\n"
+        puts "\033\[01m\033\[97mCommands:\033\[00m\n\t\033\[97m--add\033\[00m\n\tadd a device to known host devices\n"
+        puts "\t\033\[97m--remove <option>\033\[00m\n\tremove a device from known host devices, can be combined with option --purge\n\tto remove device ssh-key\n"
+        puts "\t\033\[97m--modify\033\[00m\n\tmodify a device from known host devices\n"
+        puts "\t\033\[97m--connect <args|options>\033\[00m\n\tconnect to known device with ssh args and options, automated\n"
+        puts "\t\033\[97m--show\033\[00m\n\tshow known host devices\n"
     
     }
     
@@ -101,7 +101,7 @@ proc version {} {
     signature $sign
 
     puts "\033\[97m\033\[01mVersion:\033\[00m"
-    puts "  0.3.1 \[BETA\]\n"
+    puts "  0.3.2 \[BETA\]\n"
     puts "Developed by Stefano Fattore aka MastroGibbs\n"
     exit 0
 }
@@ -216,7 +216,7 @@ proc parseargs {argc argv} {
 
         {(^\-v$|^\-\-version$)} { version }
 
-        {(^uninstall$)} { 
+        {(^\-\-uninstall$)} { 
             set opt ""
             if { $argc == 2 } {
                 set tmp [lindex $argv 1]
@@ -230,7 +230,7 @@ proc parseargs {argc argv} {
             uninstall $opt
         }
 
-        {(^config$)} {
+        {(^\-\-config$)} {
             set opt 0
 
             if { $argc < 2 } { puts "\[\033\[91mERR\033\[00m\] => must specify configure option"; exit -1 }
@@ -267,7 +267,7 @@ proc parseargs {argc argv} {
         set err_msg "\[\033\[91mERR\033\[00m\] => unknown command '$curr' or invalid at this position\n\trun atl --help $iter"
 
         switch -regexp -- $curr {
-            {(^git$|^ssh$|^uninstall$|^config$)} { puts $err_msg; exit -1 }
+            {(^git$|^ssh$|^\-\-uninstall$|^\-\-config$)} { puts $err_msg; exit -1 }
 
             {(^\-h$|^\-\-help$)} { help $COMMAND }
     
@@ -289,11 +289,11 @@ proc parseargs {argc argv} {
 
                 } elseif { $COMMAND == "ssh" } {
                     switch -regexp -- $curr {
-                        {(^connect$|^remove$|^modify$|^add$|^show$)} {
+                        {(^\-\-connect$|^\-\-remove$|^\-\-modify$|^\-\-add$|^\-\-show$)} {
                             if { $iter != 1 } { puts $err_msg; exit -1 }
                             set command $curr
 
-                            if { $argc == 3 && $curr == "remove"} {
+                            if { $argc == 3 && $curr == "--remove"} {
                                 set tmp [lindex $argv 2]
                                 if { $tmp != "--purge" } {
                                     puts "\[\033\[91mERR\033\[00m\] => unknown option '$tmp'\n\trun atl ssh --help"
@@ -303,7 +303,8 @@ proc parseargs {argc argv} {
                         }
 
                         default {
-                            # problems
+                            # maybe running ssh suite command?
+                            # can i parse it?
                             # if { $iter == 1 } { puts $err_msg; exit -1 }
                         }
                     }
@@ -496,18 +497,49 @@ proc mod_ssh_dev {dev} {
 }
 
 proc connect_ssh {dev arguments} {
+    set status 0
+    set response "n"
     set user [exec whoami]
-    set devss /home/$user/.atl/ssh/$dev/ss
-    set devencr /home/$user/.atl/ssh/$dev/conf/encr
-    lassign [split $dev "@"] uname host
 
-    set PASS [exec head -n1 $devss | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$devencr]
+    if { $dev != "" } {
+        set status 1
+        set devss /home/$user/.atl/ssh/$dev/ss
+        set devencr /home/$user/.atl/ssh/$dev/conf/encr
+        lassign [split $dev "@"] uname host
+    
+        set PASS [exec head -n1 $devss | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$devencr]
 
-    spawn -noecho ssh {*}$arguments $dev
+        spawn -noecho ssh {*}$arguments $dev
+
+    } else {
+        foreach {entry} $arguments {
+            if { [regexp -- {^([A-Za-z][A-Za-z0-9_]*\@)} $entry] } {
+                lassign [split $entry "@"] uname host
+                set dev $entry
+                break
+            }
+        }
+
+        if {[file exists /home/$user/.atl/ssh/$dev]} {
+            set status 1
+            puts "Hosts found in known hosts"
+            set devss /home/$user/.atl/ssh/$dev/ss
+            set devencr /home/$user/.atl/ssh/$dev/conf/encr
+
+            set PASS [exec head -n1 $devss | openssl aes-256-cbc -d -a -pbkdf2 -salt -pass file:$devencr]
+        } else {
+            puts "No hosts found in known hosts, you will need to interact"
+            puts "Do you want store this host? \[y/n\]"
+            gets stdin response
+        }
+
+        spawn -noecho ssh {*}$arguments
+    }
+    
     expect {
         timeout { puts "Timeout reached\naborting.\n"; exit -1 }
         eof { puts "done."; exit -1 }
-        "ssh:" { send_user "\n\[\033\[91mERR\033\[00m\] => an error was generated\naborting.\n"; exit -1 }
+        "ssh:" { send_user "\[\033\[91mERR\033\[00m\] => an error was generated\naborting.\n"; exit -1 }
         "Are you sure you want to continue connecting*" {
             send_user "\nPress \[y/n\] to interact"
             exec /bin/stty raw -echo <@stdin
@@ -524,12 +556,27 @@ proc connect_ssh {dev arguments} {
         }
 
         "Permission denied, please try again." {
-            puts "\n\n\[\033\[91mERR\033\[00m\] => wrong credentials for $dev\n\trun 'atl ssh modify' and change the data for this host"
+            puts "\n\[\033\[93mWARN\033\[00m\] => wrong credentials for $dev\n"
+            puts "Re-enter your password:"
+            exp_continue
+        }
+
+        "$dev: Permission denied (publickey)." {
+            puts "\[\033\[92mTIP\033\[00m\] => if host is stored run 'atl ssh --modify' and change data for this host"
+            puts "aborting."
             exit -1
         }
         
         "$dev's password:" {
-            send "$PASS\r"
+            if { $status } {
+                send "$PASS\r"
+            } else {
+                exec /bin/stty raw -echo <@stdin
+                gets stdin passwd
+                exec /bin/stty -raw echo <@stdin
+                send "$passwd\n"
+            }
+            
             exp_continue
         }
 
@@ -538,12 +585,40 @@ proc connect_ssh {dev arguments} {
 
     interact
 
+    if { $response == "Y" || $response == "y" } {
+        set cache /home/$user/.atl/cache
+        set err_msg "\[\033\[91mERR\033\[00m\] => something went wrong\naborting."
+
+        if {[file exists $cache]} {
+            set ifol [exec head -n1 $cache]
+    
+            if { $ifol != "" } {
+                set ifol ${ifol}bin/config
+                if {[file exists $ifol]} {
+                    spawn -noecho $ifol --ssh-data=$dev%20$passwd
+                    interact
+                    exit 0
+                } else {
+                    puts "\[\033\[91mERR\033\[00m\] => no script found\naborting."
+                    exit -1
+                }
+            } else {
+                puts $err_msg
+                exit -1
+            }
+        } else {
+            puts $err_msg
+            exit -1
+        }
+    }
+
 }
 
 proc ssh_add {} {
     set user [exec whoami]
     set sshdevs /home/$user/.atl/ssh
     set cache /home/$user/.atl/cache
+    set err_msg "\[\033\[91mERR\033\[00m\] => something went wrong\naborting."
 
     if {[file exists $cache]} {
         set ifol [exec head -n1 $cache]
@@ -555,7 +630,7 @@ proc ssh_add {} {
                 interact
                 exit 0
             } else {
-                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting"
+                puts "\[\033\[91mERR\033\[00m\] => no script found\naborting."
                 exit -1
             }
         } else {
@@ -659,7 +734,7 @@ switch -regexp -- $COMMAND {
         }
 
         switch -regexp -- $command {
-            {(^show$)} {
+            {(^\-\-show$)} {
                 set choice 0
                 set sign "known hosts list"
                 get_ssh_entry $sign $choice
@@ -667,7 +742,7 @@ switch -regexp -- $COMMAND {
                 exit 0
             }
 
-            {(^connect$)} {
+            {(^\-\-connect$)} {
                 set choice 1
                 set dev [get_ssh_entry $command $choice]
                 
@@ -679,7 +754,7 @@ switch -regexp -- $COMMAND {
                 exit 0
             }
 
-            {(^remove$)} {
+            {(^\-\-remove$)} {
                 set choice 1
                 set dev [get_ssh_entry $command $choice]
                 set silent 0
@@ -697,7 +772,7 @@ switch -regexp -- $COMMAND {
                 exit 0
             }
 
-            {(^modify$)} {
+            {(^\-\-modify$)} {
                 set choice 1
                 set dev [get_ssh_entry $command $choice]
                 set silent 1
@@ -707,7 +782,7 @@ switch -regexp -- $COMMAND {
                 exit 0
             }
 
-            {(^add$)} {
+            {(^\-\-add$)} {
                 set sign "ssh $command process for"
                 signature $sign
                 ssh_add
@@ -719,8 +794,11 @@ switch -regexp -- $COMMAND {
             }
 
             default {
+                # default ssh suite commands case
+
+                set arguments [lrange $argv 1 end]
                 set dev ""
-                connect_ssh $arguments $dev
+                connect_ssh $dev $arguments 
 
                 exit 0
             }

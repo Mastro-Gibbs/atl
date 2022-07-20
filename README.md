@@ -11,7 +11,7 @@
 
 [![forthebadge](https://img.shields.io/badge/GNU%2FLinux-SUPPORT-gray?labelColor=FFC602&logo=linux&logoColor=black&link=https://www.getgnulinux.org/en/)](https://www.getgnulinux.org/en/)  
 
-[![forthebadge](https://img.shields.io/badge/version-0.3.1-important)](https://github.com/Mastro-Gibbs/atl/blob/main/src/atl)
+[![forthebadge](https://img.shields.io/badge/version-0.3.2-important)](https://github.com/Mastro-Gibbs/atl/blob/main/src/atl)
 
 ---
 
@@ -46,7 +46,7 @@ In case of reinstallation, the script will identify the previous installation an
 In both cases the previous installation will be removed.
 ##### Explanation:
 * ```--configure``` will run the configuration script which will check the dependencies needed for the main script to work.
-* ```--prefix=<some_path>``` set the preferred installation path, preferably it should start from ```/home/<user>/```, otherwise errors could be generated.
+* ```--prefix=<some_path>``` set the preferred installation path, preferably it should start with ```/home/<user>/```, otherwise errors could be generated.
 
 ---
 

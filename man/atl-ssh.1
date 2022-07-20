@@ -3,10 +3,10 @@
 .\"    Author: [see the "Authors" section]
 .\"      Date: 04/25/2022
 .\"    Manual: Atl-ssh Manual
-.\"    Source: Atl 0.3.1 BETA
+.\"    Source: Atl 0.3.2 BETA
 .\"  Language: English
 .\"
-.TH "ATL\-SSH" "1" "07/19/2022" "Atl 0\&.3\&.1" "Atl\-ssh Manual"
+.TH "ATL\-SSH" "1" "07/19/2022" "Atl 0\&.3\&.2" "Atl\-ssh Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .nh
@@ -45,7 +45,7 @@ Runs ssh suite wrapped by \fIAtl\fR\&.
 .sp
 .RE
 .PP
-\fBadd\fR
+\fB\-\-add\fR
 .RS 4
 Runs the script to add a new host to the list of known hosts\&. 
 .RE
@@ -54,13 +54,13 @@ If the host already exists, it will be overwritten.
 .sp
 .RE
 .PP
-\fBshow\fR
+\fB\-\-show\fR
 .RS 4
 Runs the routine which shows the list of known hosts\&. 
 .sp
 .RE
 .PP
-\fBmodify\fR
+\fB\-\-modify\fR
 .RS 4
 Runs the script to modify a known host from the list of known hosts\&. 
 .RE
@@ -69,7 +69,7 @@ The list of known hosts will be shown, in paged format from which you can select
 .sp
 .RE
 .PP
-\fBremove\fR
+\fB\-\-remove\fR
 .RS 4
 Runs the script to remove a known host from the list of known hosts\&. 
 .RE
@@ -84,7 +84,7 @@ This command can be combined with the \'\-\-purge\' option to remove the ssh-key
 .sp
 .RE
 .PP
-\fBconnect\fR
+\fB\-\-connect\fR
 .RS 4
 Runs the routine to connect to a known host from the list of known hosts\&. 
 .RE
@@ -114,25 +114,25 @@ it will be advised to modify the data of the saved host\&. Automated\&.
 .sp
 .RE
 .PP
-\fBatl git ssh show\fR
+\fBatl ssh \-\-show\fR
 .RS 4
 Prints known hosts\&.
 .sp
 .RE
 .PP
-\fBatl ssh add\fR
+\fBatl ssh \-\-add\fR
 .RS 4
 Adds a new host data\&.
 .sp
 .RE
 .PP
-\fBatl ssh connect\fR
+\fBatl ssh \-\-connect\fR
 .RS 4
 Try to enstablish a connection to a selected host\&.
 .sp
 .RE
 .PP
-\fBatl ssh remove \-\-purge\fR
+\fBatl ssh \-\-remove \-\-purge\fR
 .RS 4
 Remove host from known host, \-\-purge option will remove ss-key from \'~/.ssh/known_hosts\'\&.
 .sp
@@ -157,7 +157,7 @@ When auth is not required\&.
 .SH KNOWN BUGS
 .RE
 .IP \[bu] 2
-Problems with \fBssh\fR commands/options suite\&.
+None for now\&.
 .RE
 
 .SH "AUTHORS"

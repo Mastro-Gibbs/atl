@@ -3,14 +3,37 @@
 #
 # author stefano fattore
 #
-# version BETA 0.3.1
+# version BETA 0.3.2
+
 
 DEPENDECIES=0
 GITDATA=0
 SSHDATA=0
+SSHSTORE=0
 SSHCFG=""
 SILENT=0
 COUNT=0
+
+function valid_ip()
+{
+    local  IPA1=$1
+    local  stat=0
+
+    if [[ $IPA1 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]];
+    then
+        OIFS=$IFS
+        IFS='.'
+        ip=($IPA1)
+        IFS=$OIFS
+
+        if [[ ${ip[0]} -le 255 ]] && [[ ${ip[1]} -le 255 ]] && [[ ${ip[2]} -le 255 ]] && [[ ${ip[3]} -le 255 ]];
+        then
+            stat=1
+        fi
+    fi
+    return $stat
+}
+
 
 helper(){
     echo "config [option]"
@@ -47,6 +70,34 @@ for i in "$@"; do
         ;;
     -s|--ssh)
         SSHDATA=1
+        shift 
+        ;;
+    -sd=*|--ssh-data=*)
+        SSHSTORE=1
+        SSHCFG="${i#*=}%20"
+        arr=()
+        while [[ $SSHCFG ]]; do
+            arr+=( "${SSHCFG%%"%20"*}" )
+            SSHCFG=${SSHCFG#*"%20"}
+        done
+
+        SSHCFG=("${arr[@]}")
+        arr=($(echo ${SSHCFG[0]} | tr "@" "\n"))
+
+        if [ ${#arr[@]} -lt 2 ]; then
+            echo "Invalid host"
+            exit -1
+        fi
+        valid_ip ${arr[1]}
+        res=$?
+        if [[ $res -eq 0 ]]
+        then
+            echo "Invalid ip"
+            exit -1
+        fi
+
+        SSHCFG=( "${arr[0]}" "${arr[1]}" "${SSHCFG[1]}" )
+
         shift 
         ;;
     -sr=*|--ssh-replace=*)
@@ -168,26 +219,6 @@ git_data(){
     chmod 0400 ${basedir}/git/ss                                # set minimal privs
 }
 
-function valid_ip()
-{
-    local  IPA1=$1
-    local  stat=0
-
-    if [[ $IPA1 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]];
-    then
-        OIFS=$IFS
-        IFS='.'
-        ip=($IPA1)
-        IFS=$OIFS
-
-        if [[ ${ip[0]} -le 255 ]] && [[ ${ip[1]} -le 255 ]] && [[ ${ip[2]} -le 255 ]] && [[ ${ip[3]} -le 255 ]];
-        then
-            stat=1
-        fi
-    fi
-    return $stat
-}
-
 ssh_data(){
     if [ $SILENT -eq 0 ]; then
         echo
@@ -218,6 +249,51 @@ ssh_data(){
 
     echo "> Set password: (silent)"
     read -s passwd
+
+    if [[ ! -d "${basedir}/ssh/${uname}@${host}" ]]
+    then
+        if [ $SSHCFG != "" ]; then
+            if [[ -d "${basedir}/ssh/${SSHCFG}" ]]
+            then
+                rm -rf ${basedir}/ssh/${SSHCFG}
+            fi
+        fi
+        echo "Created ${basedir}/ssh/${uname}@${host} folder.."
+        mkdir ${basedir}/ssh/${uname}@${host}
+    else
+        echo "Regenerated ${basedir}/ssh/${uname}@${host} folder.."
+        rm -rf ${basedir}/ssh/${uname}@${host}
+        mkdir ${basedir}/ssh/${uname}@${host}
+    fi
+
+    if [[ ! -d "${basedir}/ssh/${uname}@${host}/conf" ]]
+    then
+        echo "Created ${basedir}/ssh/${uname}@${host}/conf folder.."
+        mkdir ${basedir}/ssh/${uname}@${host}/conf
+    fi
+
+    if [ $SILENT -eq 0 ]; then
+        echo "Created ${basedir}/ssh/${uname}@${host}/conf/encr file.."
+    fi
+    touch ${basedir}/ssh/${uname}@${host}/conf/encr
+
+    if [ $SILENT -eq 0 ]; then
+        echo "Created ${basedir}/ssh/${uname}@${host}/ss file.."
+    fi
+    touch ${basedir}/ssh/${uname}@${host}/ss
+
+    head -c 256 /dev/random | base64 > ${basedir}/ssh/${uname}@${host}/conf/encr  # gen rand pass
+    chmod 0400 ${basedir}/ssh/${uname}@${host}/conf/encr                          # set minimal privs
+
+    echo $passwd | openssl aes-256-cbc -a -pbkdf2 -salt -pass file:${basedir}/ssh/${uname}@${host}/conf/encr > ${basedir}/ssh/${uname}@${host}/ss
+
+    chmod 0400 ${basedir}/ssh/${uname}@${host}/ss                     # set minimal privs
+}
+
+ssh_store(){
+    uname=${SSHCFG[0]}
+    host=${SSHCFG[1]}
+    passwd=${SSHCFG[2]}
 
     if [[ ! -d "${basedir}/ssh/${uname}@${host}" ]]
     then
@@ -340,7 +416,15 @@ if [ $SSHDATA -eq 1 ]; then
 
 fi
 
+if [ $SSHSTORE -eq 1 ]; then
+    ssh_store
+    echo "done."
+
+fi
+
 if [ $DEPENDECIES -eq 1 ]; then
     dependencies
 fi
+
+
 
