@@ -33,10 +33,6 @@ ATL is a tool available on GNU/Linux systems that allows you to automate various
 
 ## Installation
 
-Clone or fork this repository, get the source code, run:
-
-
-
 ```bash
 $ git clone <http_to_this_repo>
 $ cd atl/src/
