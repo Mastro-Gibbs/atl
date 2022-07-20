@@ -55,12 +55,12 @@ In both cases the previous installation will be removed.
 ##### There are two ways to go:
 * Tool only removal
   ```bash
-  $ atl uninstall
+  $ atl --uninstall
   ```
 
 * Tool and configuration folder removal
   ```bash
-  $ atl uninstall --purge
+  $ atl --uninstall --purge
   ```
 ---
 
@@ -68,17 +68,17 @@ In both cases the previous installation will be removed.
 * For **git** run the following command.  
 A script will be executed that will interactively ask for credentials, which will be **encrypted** and saved in ```/home/<user>/.atl/git/```.
   ```bash
-  $ atl config git
+  $ atl --config git
   ```   
 
 * For **ssh** run the following command.  
 A script will be executed that will interactively ask for the credentials, which will be **encrypted** and saved in a **relative** and **personal folder** for the host entered, in ```/home/<user>/.atl/ssh/```.
   ```bash
-  $ atl ssh add
+  $ atl ssh --add
   ```
   or, but read man page for atl:
   ```bash
-  $ atl config ssh
+  $ atl --config ssh
   ```
 
 
@@ -86,15 +86,25 @@ A script will be executed that will interactively ask for the credentials, which
 
 ## Usage
 
-```bash
-$ atl git push origin <branch_name>
-```
-```bash
-$ atl git saio <commit_message>
-```
-```bash
-$ atl ssh connect
-```
+- To perform an automated push on the selected branch
+  ```bash
+  $ atl git push origin <branch_name>
+  ```
+- To perform a ```simple all in one``` command
+  ```bash
+  $ atl git saio <commit_message>
+  ```
+- To perform an ssh connection to a known host
+  ```bash
+  $ atl ssh --connect
+  ```
+- To perform an ssh connection with ssh commands suite (X11 Farwarding for example).  
+This command will ask you interactively if you want to **archive** this new host, if the connection is successful and the host in question is not already present among the known ones.
+  ```bash
+  $ atl ssh -X <user>@<host>
+  ```
+
+
 #### See man page for more:
 - **atl**(1)
 - **atl-git**(1)
